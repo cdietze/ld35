@@ -56,15 +56,16 @@ public class BoardState {
         }
     }
 
-//    private class ExpandoBlock extends Block {
-//        public ExpandoBlock(int initialFieldIndex) {
-//            super(BlockType.EXPANDO, initialFieldIndex);
-//        }
-//        @Override public boolean canPlayerEnter() { return true; }
-//        @Override public void onPlayerEnter() { // TODO remove myself
-//        }
-//        @Override public boolean removeTailOnPass() { return false; }
-//    }
+    private class ExpandoBlock extends Block {
+        public ExpandoBlock(int initialFieldIndex) {
+            super(BlockType.EXPANDO, initialFieldIndex);
+        }
+        @Override public boolean canPlayerEnter(Direction dir) { return true; }
+        @Override public void beforePlayerEnters(Direction dir) {
+            blocks.remove(this);
+        }
+        @Override public boolean removeTailOnPass() { return false; }
+    }
 
     public final Level level;
 
@@ -87,7 +88,8 @@ public class BoardState {
             blocks.add(block);
         }
 
-//        blocks.add(new ExpandoBlock(0));
+        blocks.add(new ExpandoBlock(0));
+        blocks.add(new ExpandoBlock(4));
     }
 
     public void tryMovePlayer(Direction dir) {
