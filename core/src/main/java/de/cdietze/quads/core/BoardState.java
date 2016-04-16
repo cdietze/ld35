@@ -12,7 +12,7 @@ public class BoardState {
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
-        for (int pos = 0; pos < level.fieldCount; ++pos) {
+        for (int pos = 0; pos < level.fieldCount; pos += 2) {
             pieces.add(new Piece(pos));
         }
     }
