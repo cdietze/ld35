@@ -51,7 +51,7 @@ public class BoardScreen extends Screen {
     private final class Board {
         public final GroupLayer rootLayer = new GroupLayer();
         private final GroupLayer gridLayer = new GroupLayer();
-        private final Level level = new Level();
+        private final Level level = state.level;
 
         private final List<Layer> fieldLayers;
 
