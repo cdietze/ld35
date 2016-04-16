@@ -220,6 +220,8 @@ public class BoardScreen extends Screen {
                 switch (block.type) {
                     case PLAIN:
                         return createPieceLayer();
+                    case EXPANDO:
+                        return createPieceLayer().setTint(0xffff0000);
                     default:
                         throw new AssertionError();
                 }
