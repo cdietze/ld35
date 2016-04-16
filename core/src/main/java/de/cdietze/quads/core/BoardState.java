@@ -1,18 +1,15 @@
 package de.cdietze.quads.core;
 
+import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
+import com.google.common.collect.Collections2;
 import pythagoras.i.IPoint;
 import pythagoras.i.Point;
-import react.IntValue;
-import react.RList;
-import react.Value;
-import react.Values;
+import react.*;
 import tripleplay.util.Logger;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static de.cdietze.quads.core.PointUtils.*;
 
@@ -76,32 +73,35 @@ public class BoardState {
 
     public class DoorBlock extends Block {
 
+        public final int doorLinkIndex;
         public final Value<Boolean> isOpen = Value.create(false);
         private final Value<Boolean> isPlayerCrossing = Value.create(false);
 
-        public DoorBlock(int initialFieldIndex) {
+        public DoorBlock(int doorLinkIndex, int initialFieldIndex, Collection<ButtonBlock> buttons) {
             super(BlockType.DOOR, initialFieldIndex);
-        }
-        public void setButton(ButtonBlock button) {
-            // Keep the door open as long as the player is crossing
-            Values.or(button.isDown, isPlayerCrossing).connectNotify(isOpen.slot());
+            this.doorLinkIndex = doorLinkIndex;
+            ValueView<Boolean> allButtonsDown = Values.and(Collections2.transform(buttons, new Function<ButtonBlock, ValueView<Boolean>>() {
+                @Override public ValueView<Boolean> apply(ButtonBlock buttonBlock) {
+                    return buttonBlock.isDown;
+                }
+            }));
+            Values.or(allButtonsDown, isPlayerCrossing).connectNotify(isOpen.slot());
         }
         @Override public boolean canPlayerEnter(Direction dir) { return isOpen.get(); }
         @Override public void beforePlayerEnters(Direction dir) {
             isPlayerCrossing.update(true);
         }
-        @Override public void afterPlayerLeft() {
-            isPlayerCrossing.update(false);
-            isOpen.update(false);
-        }
+        @Override public void afterPlayerLeft() { isPlayerCrossing.update(false); }
     }
 
     public class ButtonBlock extends Block {
 
+        public final int doorLinkIndex;
         public final Value<Boolean> isDown = Value.create(false);
 
-        public ButtonBlock(int initialFieldIndex) {
+        public ButtonBlock(int doorLinkIndex, int initialFieldIndex) {
             super(BlockType.BUTTON, initialFieldIndex);
+            this.doorLinkIndex = doorLinkIndex;
         }
         @Override public boolean canPlayerEnter(Direction dir) { return true; }
         @Override public void beforePlayerEnters(Direction dir) { isDown.update(true); }
@@ -131,11 +131,17 @@ public class BoardState {
             blocks.add(new ExpandoBlock(fieldIndex));
         }
 
-        ButtonBlock buttonBlock = new ButtonBlock(6);
-        blocks.add(buttonBlock);
-        DoorBlock doorBlock = new DoorBlock(20);
-        blocks.add(doorBlock);
-        doorBlock.setButton(buttonBlock);
+        for (int i = 0; i < level.doorLinks.size(); i++) {
+            Level.DoorLink doorLink = level.doorLinks.get(i);
+            List<ButtonBlock> buttons = new ArrayList<>();
+            for (int fieldIndex : doorLink.buttons) {
+                buttons.add(new ButtonBlock(i, fieldIndex));
+            }
+            blocks.addAll(buttons);
+            for (int fieldIndex : doorLink.doors) {
+                blocks.add(new DoorBlock(i, fieldIndex, buttons));
+            }
+        }
     }
 
     public void tryMovePlayer(Direction dir) {
