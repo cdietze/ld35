@@ -9,22 +9,25 @@ import pythagoras.i.Point;
 import react.*;
 import tripleplay.util.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 import static de.cdietze.quads.core.PointUtils.*;
 
 public class BoardState {
     public static final Logger log = new Logger("state");
 
-    enum BlockType {
-        WALL, PLAIN, EXPANDO, DOOR, BUTTON;
-    }
+    public static abstract class Entity {
+        enum Type {
+            WALL, PLAIN, EXPANDO, DOOR, BUTTON;
+        }
 
-    public static abstract class Block {
-        public final BlockType type;
+        public final Type type;
         public final IntValue fieldIndex;
 
-        public Block(BlockType type, int initialFieldIndex) {
+        public Entity(Type type, int initialFieldIndex) {
             this.type = type;
             fieldIndex = new IntValue(initialFieldIndex);
         }
@@ -43,49 +46,49 @@ public class BoardState {
         }
     }
 
-    public class WallBlock extends Block {
-        public WallBlock(int fieldIndex) { super(BlockType.WALL, fieldIndex); }
+    public class WallEntity extends Entity {
+        public WallEntity(int fieldIndex) { super(Type.WALL, fieldIndex); }
         @Override public boolean canPlayerEnter(Direction dir) { return false; }
     }
 
-    private class PushBlock extends Block {
-        public PushBlock(int initialFieldIndex) {
-            super(BlockType.PLAIN, initialFieldIndex);
+    private class PushEntity extends Entity {
+        public PushEntity(int initialFieldIndex) {
+            super(Type.PLAIN, initialFieldIndex);
         }
         @Override public boolean canPlayerEnter(Direction dir) {
-            return canMoveBlock(this, dir);
+            return canMoveEntity(this, dir);
         }
         @Override public void beforePlayerEnters(Direction dir) {
             super.beforePlayerEnters(dir);
             int moveOffset = toIndex(level.dim, dir.x(), dir.y());
-            moveBlock(this, moveOffset);
+            moveEntity(this, moveOffset);
         }
     }
 
-    private class ExpandoBlock extends Block {
-        public ExpandoBlock(int initialFieldIndex) {
-            super(BlockType.EXPANDO, initialFieldIndex);
+    private class ExpandoEntity extends Entity {
+        public ExpandoEntity(int initialFieldIndex) {
+            super(Type.EXPANDO, initialFieldIndex);
         }
         @Override public boolean canPlayerEnter(Direction dir) { return true; }
         @Override public void beforePlayerEnters(Direction dir) {
             super.beforePlayerEnters(dir);
-            blocks.remove(this);
+            entities.remove(this);
         }
         @Override public boolean removeTailOnPass() { return false; }
     }
 
-    public class DoorBlock extends Block {
+    public class DoorEntity extends Entity {
 
         public final int doorLinkIndex;
         public final Value<Boolean> isOpen = Value.create(false);
         private final Value<Boolean> isPlayerCrossing = Value.create(false);
 
-        public DoorBlock(int doorLinkIndex, int initialFieldIndex, Collection<ButtonBlock> buttons) {
-            super(BlockType.DOOR, initialFieldIndex);
+        public DoorEntity(int doorLinkIndex, int initialFieldIndex, Collection<ButtonEntity> buttons) {
+            super(Type.DOOR, initialFieldIndex);
             this.doorLinkIndex = doorLinkIndex;
-            ValueView<Boolean> allButtonsDown = Values.and(Collections2.transform(buttons, new Function<ButtonBlock, ValueView<Boolean>>() {
-                @Override public ValueView<Boolean> apply(ButtonBlock buttonBlock) {
-                    return buttonBlock.isDown;
+            ValueView<Boolean> allButtonsDown = Values.and(Collections2.transform(buttons, new Function<ButtonEntity, ValueView<Boolean>>() {
+                @Override public ValueView<Boolean> apply(ButtonEntity buttonEntity) {
+                    return buttonEntity.isDown;
                 }
             }));
             Values.or(allButtonsDown, isPlayerCrossing).connectNotify(isOpen.slot());
@@ -97,13 +100,13 @@ public class BoardState {
         @Override public void afterPlayerLeft() { isPlayerCrossing.update(false); }
     }
 
-    public class ButtonBlock extends Block {
+    public class ButtonEntity extends Entity {
 
         public final int doorLinkIndex;
         public final Value<Boolean> isDown = Value.create(false);
 
-        public ButtonBlock(int doorLinkIndex, int initialFieldIndex) {
-            super(BlockType.BUTTON, initialFieldIndex);
+        public ButtonEntity(int doorLinkIndex, int initialFieldIndex) {
+            super(Type.BUTTON, initialFieldIndex);
             this.doorLinkIndex = doorLinkIndex;
         }
         @Override public boolean canPlayerEnter(Direction dir) { return true; }
@@ -113,7 +116,7 @@ public class BoardState {
 
     public final Level level;
 
-    public final RList<Block> blocks = RList.create();
+    public final RList<Entity> entities = RList.create();
 
     public final IntValue playerHead;
     /**
@@ -128,25 +131,25 @@ public class BoardState {
         playerHead = new IntValue(level.playerStart);
 
         for (int fieldIndex : level.walls) {
-            blocks.add(new WallBlock(fieldIndex));
+            entities.add(new WallEntity(fieldIndex));
         }
 
-        for (int fieldIndex : level.plainBlocks) {
-            blocks.add(new PushBlock(fieldIndex));
+        for (int fieldIndex : level.pushEntity) {
+            entities.add(new PushEntity(fieldIndex));
         }
-        for (Integer fieldIndex : level.expandoBlocks) {
-            blocks.add(new ExpandoBlock(fieldIndex));
+        for (Integer fieldIndex : level.expandoEntity) {
+            entities.add(new ExpandoEntity(fieldIndex));
         }
 
         for (int i = 0; i < level.doorLinks.size(); i++) {
             Level.DoorLink doorLink = level.doorLinks.get(i);
-            List<ButtonBlock> buttons = new ArrayList<>();
+            List<ButtonEntity> buttons = new ArrayList<>();
             for (int fieldIndex : doorLink.buttons) {
-                buttons.add(new ButtonBlock(i, fieldIndex));
+                buttons.add(new ButtonEntity(i, fieldIndex));
             }
-            blocks.addAll(buttons);
+            entities.addAll(buttons);
             for (int fieldIndex : doorLink.doors) {
-                blocks.add(new DoorBlock(i, fieldIndex, buttons));
+                entities.add(new DoorEntity(i, fieldIndex, buttons));
             }
         }
     }
@@ -159,7 +162,7 @@ public class BoardState {
     private boolean canMovePlayer(Direction dir) {
         Point pos = toPoint(level.dim, playerHead.get()).addLocal(dir.x(), dir.y());
         if (!canMoveHere(pos)) return false;
-        Optional<Block> target = blockAt(toIndex(level.dim, pos));
+        Optional<Entity> target = entityAt(toIndex(level.dim, pos));
         if (target.isPresent()
                 && !target.get().canPlayerEnter(dir)) {
             return false;
@@ -170,36 +173,36 @@ public class BoardState {
     private void movePlayer(Direction dir) {
         int targetHeadIndex = addDirToIndex(level.dim, playerHead.get(), dir);
         boolean isFreshHead = !playerTail.contains(targetHeadIndex);
-        Optional<Block> targetBlock = blockAt(targetHeadIndex);
-        if (isFreshHead && targetBlock.isPresent()) {
-            log.debug("beforePlayerEnters", "block", targetBlock.get());
-            targetBlock.get().beforePlayerEnters(dir);
+        Optional<Entity> targetEntity = entityAt(targetHeadIndex);
+        if (isFreshHead && targetEntity.isPresent()) {
+            log.debug("beforePlayerEnters", "entity", targetEntity.get());
+            targetEntity.get().beforePlayerEnters(dir);
         }
         playerTail.remove(Integer.valueOf(targetHeadIndex));
         playerTail.add(0, playerHead.get());
         playerHead.update(targetHeadIndex);
 
-        if (isFreshHead && (!targetBlock.isPresent() || (targetBlock.isPresent() && targetBlock.get().removeTailOnPass()))) {
+        if (isFreshHead && (!targetEntity.isPresent() || (targetEntity.isPresent() && targetEntity.get().removeTailOnPass()))) {
             int removedFieldIndex = playerTail.remove(playerTail.size() - 1);
-            Optional<Block> block = blockAt(removedFieldIndex);
-            if (block.isPresent()) {
-                log.debug("afterPlayerLeft", "block", block.get());
-                block.get().afterPlayerLeft();
+            Optional<Entity> entity = entityAt(removedFieldIndex);
+            if (entity.isPresent()) {
+                log.debug("afterPlayerLeft", "entity", entity.get());
+                entity.get().afterPlayerLeft();
             }
         }
     }
 
-    private boolean canMoveBlock(Block block, Direction dir) {
-        Point targetPos = toPoint(level.dim, block.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
+    private boolean canMoveEntity(Entity entity, Direction dir) {
+        Point targetPos = toPoint(level.dim, entity.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
         if (!canMoveHere(targetPos)) return false;
-        Optional<Block> targetBlock = blockAt(toIndex(level.dim, targetPos));
-        if (targetBlock.isPresent() && !canMoveBlock(targetBlock.get(), dir)) return false;
+        Optional<Entity> targetEntity = entityAt(toIndex(level.dim, targetPos));
+        if (targetEntity.isPresent() && !canMoveEntity(targetEntity.get(), dir)) return false;
         return true;
     }
 
-    private Optional<Block> blockAt(int fieldIndex) {
-        for (Block block : blocks) {
-            if (block.fieldIndex.get() == fieldIndex) return Optional.of(block);
+    private Optional<Entity> entityAt(int fieldIndex) {
+        for (Entity entity : entities) {
+            if (entity.fieldIndex.get() == fieldIndex) return Optional.of(entity);
         }
         return Optional.absent();
     }
@@ -208,12 +211,12 @@ public class BoardState {
         return level.rect.contains(pos);
     }
 
-    private void moveBlock(Block block, int moveOffset) {
-        // We move the other blocks before moving ourself to avoid overlaps
-        int targetFieldIndex = block.fieldIndex.get() + moveOffset;
-        Optional<Block> targetBlock = blockAt(targetFieldIndex);
-        if (targetBlock.isPresent()) moveBlock(targetBlock.get(), moveOffset);
-        block.fieldIndex.increment(moveOffset);
+    private void moveEntity(Entity entity, int moveOffset) {
+        // We move the other entities before moving ourself to avoid overlaps
+        int targetFieldIndex = entity.fieldIndex.get() + moveOffset;
+        Optional<Entity> targetEntity = entityAt(targetFieldIndex);
+        if (targetEntity.isPresent()) moveEntity(targetEntity.get(), moveOffset);
+        entity.fieldIndex.increment(moveOffset);
     }
 
     private Point tmp = new Point();

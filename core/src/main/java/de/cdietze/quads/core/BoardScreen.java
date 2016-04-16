@@ -61,7 +61,7 @@ public class BoardScreen extends Screen {
             rootLayer.add(backgroundLayer.setDepth(-1f));
             fieldLayers = createFieldLayers();
             initPlayerLayer();
-            initBlockLayers();
+            initEntityLayers();
             initGoalLayer();
             initInput();
         }
@@ -122,28 +122,28 @@ public class BoardScreen extends Screen {
             int fieldIndex = level.playerGoal;
             int x = toX(level.dim, fieldIndex);
             int y = toY(level.dim, fieldIndex);
-            ImageLayer layer = createBlockLayer();
+            ImageLayer layer = createEntityLayer();
             layer.setTint(0xff00ff00);
 
             gridLayer.addAt(layer, x, y);
         }
 
-        private void initBlockLayers() {
-            final List<Layer> blockLayers = new ArrayList<>();
-            state.blocks.connectNotify(new RList.Listener<BoardState.Block>() {
+        private void initEntityLayers() {
+            final List<Layer> entityLayers = new ArrayList<>();
+            state.entities.connectNotify(new RList.Listener<BoardState.Entity>() {
                 @Override
-                public void onAdd(final int index, final BoardState.Block block) {
-                    Layer blockLayer = blockLayerProvider.createLayer(block);
-                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(blockLayer));
-                    gridLayer.add(blockLayer);
-                    blockLayers.add(index, blockLayer);
+                public void onAdd(final int index, final BoardState.Entity entity) {
+                    Layer entityLayer = entityLayerProvider.createLayer(entity);
+                    entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer));
+                    gridLayer.add(entityLayer);
+                    entityLayers.add(index, entityLayer);
 
-                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(blockLayer));
+                    entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer));
                 }
 
                 @Override
-                public void onRemove(int index, BoardState.Block elem) {
-                    blockLayers.remove(index).close();
+                public void onRemove(int index, BoardState.Entity elem) {
+                    entityLayers.remove(index).close();
                 }
             });
         }
@@ -169,7 +169,7 @@ public class BoardScreen extends Screen {
             return builder.build();
         }
 
-        private ImageLayer createBlockLayer() {
+        private ImageLayer createEntityLayer() {
             ImageLayer imageLayer = new ImageLayer(circleImage);
             imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
             return imageLayer;
@@ -181,20 +181,20 @@ public class BoardScreen extends Screen {
             return imageLayer;
         }
 
-        private BlockLayerProvider blockLayerProvider = new BlockLayerProvider() {
-            @Override public Layer createLayer(BoardState.Block block) {
-                switch (block.type) {
+        private EntityLayerProvider entityLayerProvider = new EntityLayerProvider() {
+            @Override public Layer createLayer(BoardState.Entity entity) {
+                switch (entity.type) {
                     case WALL:
                         return createFieldLayer().setTint(0xff222222);
                     case PLAIN:
-                        return createBlockLayer();
+                        return createEntityLayer();
                     case EXPANDO:
-                        return createBlockLayer().setTint(0xffff0000);
+                        return createEntityLayer().setTint(0xffff0000);
                     case BUTTON:
-                        return createBlockLayer().setTint(0xff0000ff);
+                        return createEntityLayer().setTint(0xff0000ff);
                     case DOOR: {
-                        BoardState.DoorBlock door = (BoardState.DoorBlock) block;
-                        final Layer layer = createBlockLayer();
+                        BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
+                        final Layer layer = createEntityLayer();
                         door.isOpen.connectNotify(new Slot<Boolean>() {
                             @Override public void onEmit(Boolean isOpen) {
                                 layer.setTint(isOpen ? 0xff0000ff : 0xff000099);
@@ -203,7 +203,7 @@ public class BoardScreen extends Screen {
                         return layer;
                     }
                     default:
-                        throw new AssertionError("Unknown block type: " + block.type);
+                        throw new AssertionError("Unknown entity type: " + entity.type);
                 }
             }
         };
@@ -252,7 +252,7 @@ public class BoardScreen extends Screen {
         return l;
     }
 
-    interface BlockLayerProvider {
-        Layer createLayer(BoardState.Block block);
+    interface EntityLayerProvider {
+        Layer createLayer(BoardState.Entity entity);
     }
 }

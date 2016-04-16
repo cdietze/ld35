@@ -42,8 +42,8 @@ public class Level {
     public final int playerStart;
     public final int playerGoal;
     public final List<Integer> walls;
-    public final List<Integer> plainBlocks;
-    public final List<Integer> expandoBlocks;
+    public final List<Integer> pushEntity;
+    public final List<Integer> expandoEntity;
     public final List<DoorLink> doorLinks;
 
     private Level(Builder builder) {
@@ -55,8 +55,8 @@ public class Level {
         playerGoal = builder.playerGoal;
         checkState(playerGoal >= 0);
         walls = ImmutableList.copyOf(builder.walls);
-        plainBlocks = ImmutableList.copyOf(builder.plainBlocks);
-        expandoBlocks = ImmutableList.copyOf(builder.expandoBlocks);
+        pushEntity = ImmutableList.copyOf(builder.pushEntity);
+        expandoEntity = ImmutableList.copyOf(builder.expandoEntity);
         doorLinks = ImmutableList.copyOf(Maps.transformValues(builder.doorLinks, DoorLink.builderFunction).values());
     }
 
@@ -87,9 +87,9 @@ public class Level {
         } else if (c == 'W') {
             builder.walls.add(index);
         } else if (c == 'P') {
-            builder.plainBlocks.add(index);
+            builder.pushEntity.add(index);
         } else if (c == 'X') {
-            builder.expandoBlocks.add(index);
+            builder.expandoEntity.add(index);
         } else if (c == '.') {
         } else if (doorRange.contains(c)) {
             builder.doorLink(c).doors.add(index);
@@ -104,8 +104,8 @@ public class Level {
         public int playerStart = -1;
         public int playerGoal = -1;
         public final List<Integer> walls = new ArrayList<>();
-        public final List<Integer> plainBlocks = new ArrayList<>();
-        public final List<Integer> expandoBlocks = new ArrayList<>();
+        public final List<Integer> pushEntity = new ArrayList<>();
+        public final List<Integer> expandoEntity = new ArrayList<>();
         private final Map<Character, Level.DoorLink.Builder> doorLinks = Maps.newTreeMap();
 
         public Builder() {}
