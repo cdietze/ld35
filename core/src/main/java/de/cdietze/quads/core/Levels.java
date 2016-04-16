@@ -10,5 +10,5 @@ public final class Levels {
             ".P.H..X\n" +
             ".......\n" +
             ".......\n" +
-            "p..p...");
+            "...G...");
 }

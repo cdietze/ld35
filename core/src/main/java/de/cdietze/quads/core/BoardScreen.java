@@ -120,15 +120,13 @@ public class BoardScreen extends Screen {
         }
 
         private void initGoalLayer() {
-            final GroupLayer group = new GroupLayer();
-            for (int fieldIndex : level.goals) {
-                int x = toX(level.dim, fieldIndex);
-                int y = toY(level.dim, fieldIndex);
-                ImageLayer layer = createPieceLayer();
-                layer.setTint(0xff00ff00);
-                group.addAt(layer, x, y);
-            }
-            gridLayer.add(group);
+            int fieldIndex = level.playerGoal;
+            int x = toX(level.dim, fieldIndex);
+            int y = toY(level.dim, fieldIndex);
+            ImageLayer layer = createPieceLayer();
+            layer.setTint(0xff00ff00);
+
+            gridLayer.addAt(layer, x, y);
         }
 
         private Layer createBlockLayer(final BoardState.Block block, final PieceLayerProvider pieceLayerProvider) {
