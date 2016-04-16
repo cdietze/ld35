@@ -53,12 +53,12 @@ public class BoardState {
             super(BlockType.PLAIN, initialFieldIndex);
         }
         @Override public boolean canPlayerEnter(Direction dir) {
-            return canMoveBlock(this, dir, new HashSet<Block>());
+            return canMoveBlock(this, dir);
         }
         @Override public void beforePlayerEnters(Direction dir) {
             super.beforePlayerEnters(dir);
             int moveOffset = toIndex(level.dim, dir.x(), dir.y());
-            moveBlock(this, moveOffset, new HashSet<Block>());
+            moveBlock(this, moveOffset);
         }
     }
 
@@ -189,14 +189,11 @@ public class BoardState {
         }
     }
 
-    private boolean canMoveBlock(Block block, Direction dir, Set<Block> checkedBlocks) {
-        if (checkedBlocks.contains(block)) return true;
-        // We haven't really checked ourselves but this avoids a potential infinite recursion
-        checkedBlocks.add(block);
+    private boolean canMoveBlock(Block block, Direction dir) {
         Point targetPos = toPoint(level.dim, block.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
         if (!canMoveHere(targetPos)) return false;
         Optional<Block> targetBlock = blockAt(toIndex(level.dim, targetPos));
-        if (targetBlock.isPresent() && !canMoveBlock(targetBlock.get(), dir, checkedBlocks)) return false;
+        if (targetBlock.isPresent() && !canMoveBlock(targetBlock.get(), dir)) return false;
         return true;
     }
 
@@ -211,14 +208,11 @@ public class BoardState {
         return level.rect.contains(pos);
     }
 
-    private void moveBlock(Block block, int moveOffset, Set<Block> movedBlocks) {
-        if (movedBlocks.contains(block)) return;
-        // We only want to move once and avoid infinite recursion so add ourself immediately
-        movedBlocks.add(block);
+    private void moveBlock(Block block, int moveOffset) {
         // We move the other blocks before moving ourself to avoid overlaps
         int targetFieldIndex = block.fieldIndex.get() + moveOffset;
         Optional<Block> targetBlock = blockAt(targetFieldIndex);
-        if (targetBlock.isPresent()) moveBlock(targetBlock.get(), moveOffset, movedBlocks);
+        if (targetBlock.isPresent()) moveBlock(targetBlock.get(), moveOffset);
         block.fieldIndex.increment(moveOffset);
     }
 
