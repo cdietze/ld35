@@ -8,24 +8,28 @@ import pythagoras.i.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
+
 public class Level {
     public final Dimension dim;
     public final Rectangle rect;
     public final int fieldCount;
     public final int playerStart;
+    public final int playerGoal;
     //    public final List<Integer> blockers;
     public final List<Integer> plainBlocks;
     public final List<Integer> expandoBlocks;
-    public final List<Integer> goals;
 
     private Level(Builder builder) {
         dim = builder.dim.clone();
         rect = new Rectangle(dim);
         fieldCount = dim.width * dim.height;
         playerStart = builder.playerStart;
+        checkState(playerStart >= 0);
+        playerGoal = builder.playerGoal;
+        checkState(playerGoal >= 0);
         plainBlocks = ImmutableList.copyOf(builder.plainBlocks);
         expandoBlocks = ImmutableList.copyOf(builder.expandoBlocks);
-        goals = ImmutableList.copyOf(builder.goals);
     }
 
     public static Level read(String s) {
@@ -53,8 +57,8 @@ public class Level {
             case 'P':
                 builder.plainBlocks.add(index);
                 break;
-            case 'p':
-                builder.goals.add(index);
+            case 'G':
+                builder.playerGoal(index);
                 break;
             case 'X':
                 builder.expandoBlocks.add(index);
@@ -68,10 +72,10 @@ public class Level {
 
     public static final class Builder {
         public Dimension dim;
-        public int playerStart;
+        public int playerStart = -1;
+        public int playerGoal = -1;
         public List<Integer> plainBlocks = new ArrayList<>();
         public List<Integer> expandoBlocks = new ArrayList<>();
-        public List<Integer> goals = new ArrayList<>();
 
         public Builder() {}
 
@@ -83,12 +87,12 @@ public class Level {
             playerStart = val;
             return this;
         }
-        public Builder plainBlocks(List<Integer> val) {
-            plainBlocks = val;
+        public Builder playerGoal(int val) {
+            playerGoal = val;
             return this;
         }
-        public Builder goals(List<Integer> val) {
-            goals = ImmutableList.copyOf(val);
+        public Builder plainBlocks(List<Integer> val) {
+            plainBlocks = val;
             return this;
         }
         public Level build() {return new Level(this);}
