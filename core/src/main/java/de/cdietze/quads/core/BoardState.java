@@ -168,18 +168,18 @@ public class BoardState {
     }
 
     private void movePlayer(Direction dir) {
-        int newHeadIndex = addDirToIndex(level.dim, playerHead.get(), dir);
-        boolean isFreshHead = !playerTail.contains(newHeadIndex);
-        Optional<Block> target = blockAt(newHeadIndex);
-        if (isFreshHead && target.isPresent()) {
-            log.debug("beforePlayerEnters", "block", target.get());
-            target.get().beforePlayerEnters(dir);
+        int targetHeadIndex = addDirToIndex(level.dim, playerHead.get(), dir);
+        boolean isFreshHead = !playerTail.contains(targetHeadIndex);
+        Optional<Block> targetBlock = blockAt(targetHeadIndex);
+        if (isFreshHead && targetBlock.isPresent()) {
+            log.debug("beforePlayerEnters", "block", targetBlock.get());
+            targetBlock.get().beforePlayerEnters(dir);
         }
-        playerTail.remove(Integer.valueOf(newHeadIndex));
+        playerTail.remove(Integer.valueOf(targetHeadIndex));
         playerTail.add(0, playerHead.get());
-        playerHead.update(newHeadIndex);
+        playerHead.update(targetHeadIndex);
 
-        if (isFreshHead && (!target.isPresent() || (target.isPresent() && target.get().removeTailOnPass()))) {
+        if (isFreshHead && (!targetBlock.isPresent() || (targetBlock.isPresent() && targetBlock.get().removeTailOnPass()))) {
             int removedFieldIndex = playerTail.remove(playerTail.size() - 1);
             Optional<Block> block = blockAt(removedFieldIndex);
             if (block.isPresent()) {
@@ -193,15 +193,10 @@ public class BoardState {
         if (checkedBlocks.contains(block)) return true;
         // We haven't really checked ourselves but this avoids a potential infinite recursion
         checkedBlocks.add(block);
-        Point newPos = toPoint(level.dim, block.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
-        if (!canMovePiece(newPos, dir, checkedBlocks)) return false;
-        return true;
-    }
-
-    private boolean canMovePiece(Point pos, Direction dir, Set<Block> checkedBlocks) {
-        if (!canMoveHere(pos)) return false;
-        Optional<Block> target = blockAt(toIndex(level.dim, pos));
-        if (target.isPresent() && !canMoveBlock(target.get(), dir, checkedBlocks)) return false;
+        Point targetPos = toPoint(level.dim, block.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
+        if (!canMoveHere(targetPos)) return false;
+        Optional<Block> targetBlock = blockAt(toIndex(level.dim, targetPos));
+        if (targetBlock.isPresent() && !canMoveBlock(targetBlock.get(), dir, checkedBlocks)) return false;
         return true;
     }
 
@@ -221,9 +216,9 @@ public class BoardState {
         // We only want to move once and avoid infinite recursion so add ourself immediately
         movedBlocks.add(block);
         // We move the other blocks before moving ourself to avoid overlaps
-        int newFieldIndex = block.fieldIndex.get() + moveOffset;
-        Optional<Block> target = blockAt(newFieldIndex);
-        if (target.isPresent()) moveBlock(target.get(), moveOffset, movedBlocks);
+        int targetFieldIndex = block.fieldIndex.get() + moveOffset;
+        Optional<Block> targetBlock = blockAt(targetFieldIndex);
+        if (targetBlock.isPresent()) moveBlock(targetBlock.get(), moveOffset, movedBlocks);
         block.fieldIndex.increment(moveOffset);
     }
 

@@ -61,7 +61,7 @@ public class BoardScreen extends Screen {
             rootLayer.add(backgroundLayer.setDepth(-1f));
             fieldLayers = createFieldLayers();
             initPlayerLayer();
-            initPiecesLayers();
+            initBlockLayers();
             initGoalLayer();
             initInput();
         }
@@ -122,29 +122,28 @@ public class BoardScreen extends Screen {
             int fieldIndex = level.playerGoal;
             int x = toX(level.dim, fieldIndex);
             int y = toY(level.dim, fieldIndex);
-            ImageLayer layer = createPieceLayer();
+            ImageLayer layer = createBlockLayer();
             layer.setTint(0xff00ff00);
 
             gridLayer.addAt(layer, x, y);
         }
 
-        private void initPiecesLayers() {
-            final List<Layer> pieceLayers = new ArrayList<>();
+        private void initBlockLayers() {
+            final List<Layer> blockLayers = new ArrayList<>();
             state.blocks.connectNotify(new RList.Listener<BoardState.Block>() {
                 @Override
                 public void onAdd(final int index, final BoardState.Block block) {
-                    Layer layer1 = pieceLayerProvider.createLayer(block);
-                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(layer1));
-                    final Layer pieceLayer = layer1;
-                    gridLayer.add(pieceLayer);
-                    pieceLayers.add(index, pieceLayer);
+                    Layer blockLayer = blockLayerProvider.createLayer(block);
+                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(blockLayer));
+                    gridLayer.add(blockLayer);
+                    blockLayers.add(index, blockLayer);
 
-                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(pieceLayer));
+                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(blockLayer));
                 }
 
                 @Override
                 public void onRemove(int index, BoardState.Block elem) {
-                    pieceLayers.remove(index).close();
+                    blockLayers.remove(index).close();
                 }
             });
         }
@@ -170,7 +169,7 @@ public class BoardScreen extends Screen {
             return builder.build();
         }
 
-        private ImageLayer createPieceLayer() {
+        private ImageLayer createBlockLayer() {
             ImageLayer imageLayer = new ImageLayer(circleImage);
             imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
             return imageLayer;
@@ -182,20 +181,20 @@ public class BoardScreen extends Screen {
             return imageLayer;
         }
 
-        private PieceLayerProvider pieceLayerProvider = new PieceLayerProvider() {
+        private BlockLayerProvider blockLayerProvider = new BlockLayerProvider() {
             @Override public Layer createLayer(BoardState.Block block) {
                 switch (block.type) {
                     case WALL:
                         return createFieldLayer().setTint(0xff222222);
                     case PLAIN:
-                        return createPieceLayer();
+                        return createBlockLayer();
                     case EXPANDO:
-                        return createPieceLayer().setTint(0xffff0000);
+                        return createBlockLayer().setTint(0xffff0000);
                     case BUTTON:
-                        return createPieceLayer().setTint(0xff0000ff);
+                        return createBlockLayer().setTint(0xff0000ff);
                     case DOOR: {
                         BoardState.DoorBlock door = (BoardState.DoorBlock) block;
-                        final Layer layer = createPieceLayer();
+                        final Layer layer = createBlockLayer();
                         door.isOpen.connectNotify(new Slot<Boolean>() {
                             @Override public void onEmit(Boolean isOpen) {
                                 layer.setTint(isOpen ? 0xff0000ff : 0xff000099);
@@ -253,7 +252,7 @@ public class BoardScreen extends Screen {
         return l;
     }
 
-    interface PieceLayerProvider {
+    interface BlockLayerProvider {
         Layer createLayer(BoardState.Block block);
     }
 }
