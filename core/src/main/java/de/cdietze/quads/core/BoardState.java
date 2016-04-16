@@ -17,7 +17,7 @@ import static de.cdietze.quads.core.PointUtils.toPoint;
 public class BoardState {
 
     enum BlockType {
-        PLAIN;
+        PLAIN, EXPANDO;
     }
 
     public static class Block {
@@ -59,6 +59,8 @@ public class BoardState {
             Block block = new Block(BlockType.PLAIN, blockIndex);
             blocks.add(block);
         }
+
+        blocks.add(new Block(BlockType.EXPANDO, 0));
     }
 
     public void tryMovePlayer(Direction dir) {

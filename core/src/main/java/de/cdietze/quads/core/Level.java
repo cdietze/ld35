@@ -61,17 +61,6 @@ public class Level {
         }
     }
 
-    public static final String lvl1 = "" +
-            ".......\n" +
-            "....P..\n" +
-            ".......\n" +
-            ".P.H...\n" +
-            ".......\n" +
-            ".......\n" +
-            "p..p...";
-
-    public static final Level level1 = read(lvl1);
-
     public static final class Builder {
         public Dimension dim;
         public int playerStart;
