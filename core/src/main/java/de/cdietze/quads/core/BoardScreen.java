@@ -9,10 +9,9 @@ import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
 import playn.scene.Layer;
 import playn.scene.Pointer;
-import react.Function;
-import react.IntValue;
-import react.RList;
-import react.UnitSlot;
+import pythagoras.f.Vector;
+import pythagoras.f.Vectors;
+import react.*;
 import tripleplay.ui.*;
 import tripleplay.ui.layout.AxisLayout;
 import tripleplay.ui.layout.BorderLayout;
@@ -101,22 +100,24 @@ public class BoardScreen extends Screen {
         private List<Layer> createFieldLayers() {
             ImmutableList.Builder<Layer> builder = ImmutableList.builder();
             for (int fieldIndex = 0; fieldIndex < level.fieldCount; ++fieldIndex) {
+                final int index = fieldIndex;
                 Layer fieldLayer = BoardScreen.createFieldLayer();
                 int x = toX(level.dim, fieldIndex);
                 int y = toY(level.dim, fieldIndex);
                 gridLayer.addAt(fieldLayer, x, y);
-                fieldLayer.events().connect(new Pointer.Listener() {
-                                                @Override
-                                                public void onStart(Pointer.Interaction iact) {
-                                                    System.out.println("click on " + this);
-                                                    // gameState.explore(fieldIndex);
-                                                }
-                                            }
-                );
+                SwipeListener swipeListener = new SwipeListener();
+                fieldLayer.events().connect(swipeListener);
+                swipeListener.completed.connect(new Slot<Direction>() {
+                    @Override
+                    public void onEmit(Direction dir) {
+                        System.out.println("completed: field " + index + ", dir: " + dir);
+                    }
+                });
                 builder.add(fieldLayer);
             }
             return builder.build();
         }
+
 
         private ImageLayer createPieceLayer() {
             ImageLayer imageLayer = new ImageLayer(circleImage);
@@ -158,5 +159,36 @@ public class BoardScreen extends Screen {
     private static Layer createFieldLayer() {
         Layer l = Layers.solid(0xff555555, .9f, .9f).setOrigin(Layer.Origin.CENTER);
         return l;
+    }
+
+    private static class SwipeListener extends Pointer.Listener {
+        final float offAxisTolerance = 20f;
+        final float onAxisThreshold = 20f;
+        private playn.core.Pointer.Event startEvent;
+
+        public Signal<Direction> completed = Signal.create();
+
+        @Override
+        public void onStart(Pointer.Interaction iact) {
+            startEvent = iact.event;
+            // gameState.explore(fieldIndex);
+        }
+
+        @Override
+        public void onEnd(Pointer.Interaction iact) {
+            Vector vec = Vectors.from(startEvent, iact.event);
+            if (vec.x() > onAxisThreshold && Math.abs(vec.y()) < offAxisTolerance) {
+                completed.emit(Direction.RIGHT);
+            }
+            if (vec.x() < -onAxisThreshold && Math.abs(vec.y()) < offAxisTolerance) {
+                completed.emit(Direction.LEFT);
+            }
+            if (vec.y() > onAxisThreshold && Math.abs(vec.x()) < offAxisTolerance) {
+                completed.emit(Direction.UP);
+            }
+            if (vec.y() < -onAxisThreshold && Math.abs(vec.x()) < offAxisTolerance) {
+                completed.emit(Direction.DOWN);
+            }
+        }
     }
 }
