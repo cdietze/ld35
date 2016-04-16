@@ -52,15 +52,13 @@ public class BoardState {
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
-        Block block = new Block(BlockType.PLAIN, 8);
-        block.pieceOffsets.add(6);
-        blocks.add(block);
 
-        playerHead = new IntValue(1);
-        playerTail.add(0);
-        playerTail.add(6);
-        playerTail.add(12);
-        playerTail.add(18);
+        playerHead = new IntValue(level.playerStart);
+
+        for (int blockIndex : level.plainBlocks) {
+            Block block = new Block(BlockType.PLAIN, blockIndex);
+            blocks.add(block);
+        }
     }
 
     public void tryMovePlayer(Direction dir) {
