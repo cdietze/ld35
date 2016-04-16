@@ -17,7 +17,7 @@ public class BoardState {
     public static final Logger log = new Logger("state");
 
     enum BlockType {
-        PLAIN, EXPANDO, DOOR, BUTTON;
+        WALL, PLAIN, EXPANDO, DOOR, BUTTON;
     }
 
     public static abstract class Block {
@@ -43,6 +43,11 @@ public class BoardState {
                     .add("fieldIndex", fieldIndex)
                     .toString();
         }
+    }
+
+    public class WallBlock extends Block {
+        public WallBlock(int fieldIndex) { super(BlockType.WALL, fieldIndex); }
+        @Override public boolean canPlayerEnter(Direction dir) { return false; }
     }
 
     private class PlainBlock extends Block {
@@ -123,6 +128,10 @@ public class BoardState {
         this.level = Objects.requireNonNull(level);
 
         playerHead = new IntValue(level.playerStart);
+
+        for (int fieldIndex : level.walls) {
+            blocks.add(new WallBlock(fieldIndex));
+        }
 
         for (int fieldIndex : level.plainBlocks) {
             blocks.add(new PlainBlock(fieldIndex));

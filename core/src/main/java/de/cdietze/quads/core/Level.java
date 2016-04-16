@@ -41,7 +41,7 @@ public class Level {
     public final int fieldCount;
     public final int playerStart;
     public final int playerGoal;
-    //    public final List<Integer> blockers;
+    public final List<Integer> walls;
     public final List<Integer> plainBlocks;
     public final List<Integer> expandoBlocks;
     public final List<DoorLink> doorLinks;
@@ -54,6 +54,7 @@ public class Level {
         checkState(playerStart >= 0);
         playerGoal = builder.playerGoal;
         checkState(playerGoal >= 0);
+        walls = ImmutableList.copyOf(builder.walls);
         plainBlocks = ImmutableList.copyOf(builder.plainBlocks);
         expandoBlocks = ImmutableList.copyOf(builder.expandoBlocks);
         doorLinks = ImmutableList.copyOf(Maps.transformValues(builder.doorLinks, DoorLink.builderFunction).values());
@@ -79,12 +80,14 @@ public class Level {
     private static void handleChar(char c, int index, Builder builder) {
         Range<Character> doorRange = Range.closed('A', 'D');
         Range<Character> buttonRange = Range.closed('a', 'd');
-        if (c == 'H') {
+        if (c == 'S') {
             builder.playerStart(index);
-        } else if (c == 'P') {
-            builder.plainBlocks.add(index);
         } else if (c == 'G') {
             builder.playerGoal(index);
+        } else if (c == 'W') {
+            builder.walls.add(index);
+        } else if (c == 'P') {
+            builder.plainBlocks.add(index);
         } else if (c == 'X') {
             builder.expandoBlocks.add(index);
         } else if (c == '.') {
@@ -100,9 +103,10 @@ public class Level {
         public Dimension dim;
         public int playerStart = -1;
         public int playerGoal = -1;
-        public List<Integer> plainBlocks = new ArrayList<>();
-        public List<Integer> expandoBlocks = new ArrayList<>();
-        private Map<Character, Level.DoorLink.Builder> doorLinks = Maps.newTreeMap();
+        public final List<Integer> walls = new ArrayList<>();
+        public final List<Integer> plainBlocks = new ArrayList<>();
+        public final List<Integer> expandoBlocks = new ArrayList<>();
+        private final Map<Character, Level.DoorLink.Builder> doorLinks = Maps.newTreeMap();
 
         public Builder() {}
 
