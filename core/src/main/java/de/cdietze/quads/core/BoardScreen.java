@@ -11,9 +11,12 @@ import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
 import playn.scene.Layer;
 import pythagoras.i.Point;
-import react.*;
-import tripleplay.ui.*;
-import tripleplay.ui.layout.AxisLayout;
+import react.RList;
+import react.Slot;
+import tripleplay.ui.Background;
+import tripleplay.ui.Root;
+import tripleplay.ui.SimpleStyles;
+import tripleplay.ui.Style;
 import tripleplay.ui.layout.BorderLayout;
 import tripleplay.util.Layers;
 
@@ -40,26 +43,9 @@ public class BoardScreen extends Screen {
 
         Board board = new Board();
         ScaledElement boardElement = new ScaledElement(board.rootLayer);
+        boardElement.addStyles(Style.BACKGROUND.is(Background.blank().inset(10f)));
 
         root.add(boardElement.setConstraint(BorderLayout.CENTER));
-
-        Group sideBar = new Group(AxisLayout.vertical());
-
-        sideBar.add(new ToggleButton("Toggle"));
-        final IntValue counter = new IntValue(0);
-        sideBar.add(new Button("Temporarily Increment Counter").onClick(new UnitSlot() {
-            @Override
-            public void onEmit() {
-                updateAnim.increment(counter, 1).then().delay(1000f).then().increment(counter, -1);
-            }
-        }));
-        sideBar.add(new Label(counter.map(new Function<Integer, String>() {
-            @Override
-            public String apply(Integer input) {
-                return "Counter: " + input;
-            }
-        })));
-        root.add(sideBar.setConstraint(BorderLayout.WEST));
     }
 
     private final class Board {
