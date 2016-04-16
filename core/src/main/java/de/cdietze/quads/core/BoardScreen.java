@@ -129,31 +129,14 @@ public class BoardScreen extends Screen {
             gridLayer.addAt(layer, x, y);
         }
 
-        private Layer createBlockLayer(final BoardState.Block block, final PieceLayerProvider pieceLayerProvider) {
-            final GroupLayer group = new GroupLayer();
-            final List<Layer> layers = new ArrayList<>();
-            block.pieceOffsets.connectNotify(new RList.Listener<Integer>() {
-                @Override public void onAdd(int index, Integer offset) {
-                    int x = toX(level.dim, offset);
-                    int y = toY(level.dim, offset);
-                    Layer layer = pieceLayerProvider.createLayer(block, offset);
-                    group.addAt(layer, x, y);
-                    layers.add(index, layer);
-                }
-                @Override public void onRemove(int index, Integer offset) {
-                    layers.remove(index).close();
-                }
-            });
-            block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(group));
-            return group;
-        }
-
         private void initPiecesLayers() {
             final List<Layer> pieceLayers = new ArrayList<>();
             state.blocks.connectNotify(new RList.Listener<BoardState.Block>() {
                 @Override
                 public void onAdd(final int index, final BoardState.Block block) {
-                    final Layer pieceLayer = createBlockLayer(block, pieceLayerProvider);
+                    Layer layer1 = pieceLayerProvider.createLayer(block);
+                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(layer1));
+                    final Layer pieceLayer = layer1;
                     gridLayer.add(pieceLayer);
                     pieceLayers.add(index, pieceLayer);
 
@@ -214,7 +197,7 @@ public class BoardScreen extends Screen {
         }
 
         private PieceLayerProvider pieceLayerProvider = new PieceLayerProvider() {
-            @Override public Layer createLayer(BoardState.Block block, int offset) {
+            @Override public Layer createLayer(BoardState.Block block) {
                 switch (block.type) {
                     case WALL:
                         return createFieldLayer().setTint(0xff222222);
@@ -285,6 +268,6 @@ public class BoardScreen extends Screen {
     }
 
     interface PieceLayerProvider {
-        Layer createLayer(BoardState.Block block, int offset);
+        Layer createLayer(BoardState.Block block);
     }
 }

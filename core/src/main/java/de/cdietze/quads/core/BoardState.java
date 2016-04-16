@@ -24,11 +24,9 @@ public class BoardState {
         public final BlockType type;
         public final IntValue fieldIndex;
 
-        public final RList<Integer> pieceOffsets = RList.create();
         public Block(BlockType type, int initialFieldIndex) {
             this.type = type;
             fieldIndex = new IntValue(initialFieldIndex);
-            pieceOffsets.add(0);
         }
 
         public abstract boolean canPlayerEnter(Direction dir);
@@ -195,10 +193,8 @@ public class BoardState {
         if (checkedBlocks.contains(block)) return true;
         // We haven't really checked ourselves but this avoids a potential infinite recursion
         checkedBlocks.add(block);
-        for (int offset : block.pieceOffsets) {
-            Point newPos = toPoint(level.dim, block.fieldIndex.get() + offset, tmp).addLocal(dir.x(), dir.y());
-            if (!canMovePiece(newPos, dir, checkedBlocks)) return false;
-        }
+        Point newPos = toPoint(level.dim, block.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
+        if (!canMovePiece(newPos, dir, checkedBlocks)) return false;
         return true;
     }
 
@@ -211,9 +207,7 @@ public class BoardState {
 
     private Optional<Block> blockAt(int fieldIndex) {
         for (Block block : blocks) {
-            for (int offset : block.pieceOffsets) {
-                if (block.fieldIndex.get() + offset == fieldIndex) return Optional.of(block);
-            }
+            if (block.fieldIndex.get() == fieldIndex) return Optional.of(block);
         }
         return Optional.absent();
     }
@@ -227,11 +221,9 @@ public class BoardState {
         // We only want to move once and avoid infinite recursion so add ourself immediately
         movedBlocks.add(block);
         // We move the other blocks before moving ourself to avoid overlaps
-        for (int pieceOffset : block.pieceOffsets) {
-            int newFieldIndex = block.fieldIndex.get() + pieceOffset + moveOffset;
-            Optional<Block> target = blockAt(newFieldIndex);
-            if (target.isPresent()) moveBlock(target.get(), moveOffset, movedBlocks);
-        }
+        int newFieldIndex = block.fieldIndex.get() + moveOffset;
+        Optional<Block> target = blockAt(newFieldIndex);
+        if (target.isPresent()) moveBlock(target.get(), moveOffset, movedBlocks);
         block.fieldIndex.increment(moveOffset);
     }
 
