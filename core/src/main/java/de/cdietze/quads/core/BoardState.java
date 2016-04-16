@@ -11,8 +11,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import static de.cdietze.quads.core.PointUtils.toIndex;
-import static de.cdietze.quads.core.PointUtils.toPoint;
+import static de.cdietze.quads.core.PointUtils.*;
 
 public class BoardState {
 
@@ -20,24 +19,52 @@ public class BoardState {
         PLAIN, EXPANDO;
     }
 
-    public static class Block {
+    public static abstract class Block {
         public final BlockType type;
         public final IntValue fieldIndex;
 
         public final RList<Integer> pieceOffsets = RList.create();
-        public Block(BlockType type, int initialFieldIdex) {
+        public Block(BlockType type, int initialFieldIndex) {
             this.type = type;
-            fieldIndex = new IntValue(initialFieldIdex);
+            fieldIndex = new IntValue(initialFieldIndex);
             pieceOffsets.add(0);
         }
+
+        public boolean canPlayerEnter(Direction dir) { return false; }
+        public void beforePlayerEnters(Direction dir) {}
+        public boolean removeTailOnPass() { return true; }
 
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
+                    .add("type", type)
                     .add("fieldIndex", fieldIndex)
                     .toString();
         }
     }
+
+    private class PlainBlock extends Block {
+        public PlainBlock(int initialFieldIndex) {
+            super(BlockType.PLAIN, initialFieldIndex);
+        }
+        @Override public boolean canPlayerEnter(Direction dir) {
+            return canMoveBlock(this, dir, new HashSet<Block>());
+        }
+        @Override public void beforePlayerEnters(Direction dir) {
+            int moveOffset = toIndex(level.dim, dir.x(), dir.y());
+            moveBlock(this, moveOffset, new HashSet<Block>());
+        }
+    }
+
+//    private class ExpandoBlock extends Block {
+//        public ExpandoBlock(int initialFieldIndex) {
+//            super(BlockType.EXPANDO, initialFieldIndex);
+//        }
+//        @Override public boolean canPlayerEnter() { return true; }
+//        @Override public void onPlayerEnter() { // TODO remove myself
+//        }
+//        @Override public boolean removeTailOnPass() { return false; }
+//    }
 
     public final Level level;
 
@@ -56,11 +83,11 @@ public class BoardState {
         playerHead = new IntValue(level.playerStart);
 
         for (int blockIndex : level.plainBlocks) {
-            Block block = new Block(BlockType.PLAIN, blockIndex);
+            Block block = new PlainBlock(blockIndex);
             blocks.add(block);
         }
 
-        blocks.add(new Block(BlockType.EXPANDO, 0));
+//        blocks.add(new ExpandoBlock(0));
     }
 
     public void tryMovePlayer(Direction dir) {
@@ -72,19 +99,26 @@ public class BoardState {
         Point pos = toPoint(level.dim, playerHead.get()).addLocal(dir.x(), dir.y());
         if (!canMoveHere(pos)) return false;
         Optional<Block> target = blockAt(toIndex(level.dim, pos));
-        if (target.isPresent() && !canMoveBlock(target.get(), dir, new HashSet<Block>())) return false;
+        if (target.isPresent()
+                && !target.get().canPlayerEnter(dir)) {
+            return false;
+        }
         return true;
     }
 
     private void movePlayer(Direction dir) {
-        Point newHeadPos = toPoint(level.dim, playerHead.get()).addLocal(dir.x(), dir.y());
-        int newHeadFieldIndex = PointUtils.toIndex(level.dim, newHeadPos);
-        boolean removed = playerTail.remove(Integer.valueOf(newHeadFieldIndex));
+        int newHeadIndex = addDirToIndex(level.dim, playerHead.get(), dir);
+        Optional<Block> target = blockAt(newHeadIndex);
+        if (target.isPresent()) {
+            target.get().beforePlayerEnters(dir);
+        }
+        boolean removed = playerTail.remove(Integer.valueOf(newHeadIndex));
         playerTail.add(0, playerHead.get());
-        playerHead.update(newHeadFieldIndex);
-        if (!removed) playerTail.remove(playerTail.size() - 1);
-        Optional<Block> target = blockAt(toIndex(level.dim, newHeadPos));
-        if (target.isPresent()) moveBlock(target.get(), toIndex(level.dim, dir.x(), dir.y()), new HashSet<Block>());
+        playerHead.update(newHeadIndex);
+
+        if (!removed && (!target.isPresent() || (target.isPresent() && target.get().removeTailOnPass()))) {
+            playerTail.remove(playerTail.size() - 1);
+        }
     }
 
     private boolean canMoveBlock(Block block, Direction dir, Set<Block> checkedBlocks) {
@@ -120,13 +154,15 @@ public class BoardState {
 
     private void moveBlock(Block block, int moveOffset, Set<Block> movedBlocks) {
         if (movedBlocks.contains(block)) return;
-        block.fieldIndex.increment(moveOffset);
+        // We only want to move once and avoid infinite recursion so add ourself immediately
         movedBlocks.add(block);
-        for (int offset : block.pieceOffsets) {
-            int newFieldIndex = block.fieldIndex.get() + offset;
+        // We move the other blocks before moving ourself to avoid overlaps
+        for (int pieceOffset : block.pieceOffsets) {
+            int newFieldIndex = block.fieldIndex.get() + pieceOffset + moveOffset;
             Optional<Block> target = blockAt(newFieldIndex);
             if (target.isPresent()) moveBlock(target.get(), moveOffset, movedBlocks);
         }
+        block.fieldIndex.increment(moveOffset);
     }
 
     private Point tmp = new Point();
