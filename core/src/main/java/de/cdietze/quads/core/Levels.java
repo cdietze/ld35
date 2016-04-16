@@ -7,7 +7,7 @@ public final class Levels {
             "XX....a\n" +
             "....P..\n" +
             ".....WA\n" +
-            ".P.S.WX\n" +
+            ".P.S.W.\n" +
             ".....WW\n" +
             ".......\n" +
             "...G...");
