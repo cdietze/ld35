@@ -48,6 +48,10 @@ public final class PointUtils {
         return toPoint(dim, index, new Point());
     }
 
+    public static int addDirToIndex(IDimension dim, int index, Direction dir) {
+        return index + dir.x() + dir.y() * dim.width();
+    }
+
     public static boolean contains(IDimension dim, int index) {
         return contains(dim, toX(dim, index), toY(dim, index));
     }

@@ -63,13 +63,40 @@ public class BoardScreen extends Screen {
             fieldLayers = createFieldLayers();
             initPlayerLayer();
             initPiecesLayers();
+            initInput();
         }
 
         private void initPlayerLayer() {
-            Layer playerLayer = createBlockLayer(state.playerBlock, pieceLayerProvider);
-            playerLayer.setTint(0xffff0000);
-            gridLayer.add(playerLayer);
-            plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
+            final GroupLayer group = new GroupLayer();
+            final List<Layer> layers = new ArrayList<>();
+            state.playerTail.connectNotify(new RList.Listener<Integer>() {
+                @Override public void onAdd(int index, Integer fieldIndex) {
+                    int x = toX(level.dim, fieldIndex);
+                    int y = toY(level.dim, fieldIndex);
+                    Layer layer = createPlayerLayer();
+                    group.addAt(layer, x, y);
+                    layers.add(index, layer);
+                }
+                @Override public void onRemove(int index, Integer fieldIndex) {
+                    layers.remove(index).close();
+                }
+            });
+
+            final Layer headLayer = createPlayerLayer();
+            headLayer.setTint(0xffff0000);
+            group.add(headLayer);
+            state.playerHead.connectNotify(new Slot<Integer>() {
+                @Override public void onEmit(Integer headFieldIndex) {
+                    int x = toX(level.dim, headFieldIndex);
+                    int y = toY(level.dim, headFieldIndex);
+                    headLayer.setTranslation(x, y);
+                }
+            });
+            gridLayer.add(group);
+        }
+
+        private void initInput() {
+            closeOnHide(plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
 
                 @Override public void onEmit(Keyboard.KeyEvent event) {
                     if (!event.down) return;
@@ -88,7 +115,7 @@ public class BoardScreen extends Screen {
                             break;
                     }
                 }
-            });
+            }));
         }
 
         private Layer createBlockLayer(final BoardState.Block block, final PieceLayerProvider pieceLayerProvider) {
@@ -154,7 +181,6 @@ public class BoardScreen extends Screen {
         private List<Layer> createFieldLayers() {
             ImmutableList.Builder<Layer> builder = ImmutableList.builder();
             for (int fieldIndex = 0; fieldIndex < level.fieldCount; ++fieldIndex) {
-                final int index = fieldIndex;
                 Layer fieldLayer = BoardScreen.createFieldLayer();
                 int x = toX(level.dim, fieldIndex);
                 int y = toY(level.dim, fieldIndex);
@@ -179,8 +205,6 @@ public class BoardScreen extends Screen {
         private PieceLayerProvider pieceLayerProvider = new PieceLayerProvider() {
             @Override public Layer createLayer(BoardState.Block block, int offset) {
                 switch (block.type) {
-                    case PLAYER:
-                        return createPlayerLayer();
                     case PLAIN:
                         return createPieceLayer();
                     default:
@@ -196,7 +220,7 @@ public class BoardScreen extends Screen {
             float size = 100;
             float radius = .45f * size;
             Canvas canvas = plat.graphics().createCanvas(size, size);
-            canvas.setStrokeColor(0xff222222);
+            canvas.setStrokeColor(0xffffffff);
             canvas.setStrokeWidth(size / 20);
             canvas.strokeCircle(size / 2, size / 2, radius);
             return canvas.image;
@@ -207,7 +231,7 @@ public class BoardScreen extends Screen {
             float radius = .2f * size;
             float margin = .1f * size;
             Canvas canvas = plat.graphics().createCanvas(size, size);
-            canvas.setFillColor(0xffbb2222);
+            canvas.setFillColor(0xffffffff);
             canvas.fillCircle(margin + radius, margin + radius, radius);
             canvas.fillCircle(size - (margin + radius), margin + radius, radius);
             float pathYStart = margin + .25f * size;
@@ -236,5 +260,4 @@ public class BoardScreen extends Screen {
     interface PieceLayerProvider {
         Layer createLayer(BoardState.Block block, int offset);
     }
-
 }
