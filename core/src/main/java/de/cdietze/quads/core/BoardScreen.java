@@ -186,7 +186,7 @@ public class BoardScreen extends Screen {
                 switch (entity.type) {
                     case WALL:
                         return createFieldLayer().setTint(0xff222222);
-                    case PLAIN:
+                    case PUSHER:
                         return createEntityLayer();
                     case EXPANDO:
                         return createEntityLayer().setTint(0xffff0000);

@@ -21,7 +21,7 @@ public class BoardState {
 
     public static abstract class Entity {
         enum Type {
-            PLAYER, WALL, PLAIN, EXPANDO, DOOR, BUTTON;
+            PLAYER, WALL, PUSHER, EXPANDO, DOOR, BUTTON;
         }
 
         public final Type type;
@@ -32,10 +32,14 @@ public class BoardState {
             fieldIndex = new IntValue(initialFieldIndex);
         }
 
-        public boolean canPlayerEnter(Direction dir) { return false; }
-        public void beforePlayerEnters(Direction dir) { }
-        public void afterPlayerLeft() { }
-        public boolean removeTailOnPass() { return true; }
+        public boolean canEnter(Entity entity, Direction dir) { return false; }
+        public boolean removePlayerTailOnEnter() { return true; }
+        public void beforeEntityEnters(Entity entity, Direction dir) {
+            log.debug("beforeEntityEnters", "this", this, "entity", entity);
+        }
+        public void afterEntityLeft(Entity entity) {
+            log.debug("afterEntityLeft", "this", this, "entity", entity);
+        }
 
         @Override
         public String toString() {
@@ -59,20 +63,28 @@ public class BoardState {
 
     public class WallEntity extends Entity {
         public WallEntity(int fieldIndex) { super(Type.WALL, fieldIndex); }
-        @Override public boolean canPlayerEnter(Direction dir) { return false; }
+        @Override public boolean canEnter(Entity e, Direction dir) { return false; }
     }
 
-    private class PushEntity extends Entity {
-        public PushEntity(int initialFieldIndex) {
-            super(Type.PLAIN, initialFieldIndex);
+    private class PusherEntity extends Entity {
+        public PusherEntity(int initialFieldIndex) {
+            super(Type.PUSHER, initialFieldIndex);
         }
-        @Override public boolean canPlayerEnter(Direction dir) {
-            return canMoveEntity(this, dir);
+        @Override public boolean canEnter(Entity e, Direction dir) {
+            Point targetPos = toPoint(level.dim, fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
+            if (!canMoveHere(targetPos)) return false;
+            Optional<Entity> targetEntity = entityAt(toIndex(level.dim, targetPos));
+            if (targetEntity.isPresent() && !targetEntity.get().canEnter(this, dir)) return false;
+            return true;
         }
-        @Override public void beforePlayerEnters(Direction dir) {
-            super.beforePlayerEnters(dir);
+        @Override public void beforeEntityEnters(Entity e, Direction dir) {
+            super.beforeEntityEnters(e, dir);
             int moveOffset = toIndex(level.dim, dir.x(), dir.y());
-            moveEntity(this, moveOffset);
+            // We move the other entities before moving ourself to avoid overlaps
+            int targetFieldIndex = fieldIndex.get() + moveOffset;
+            Optional<Entity> targetEntity = entityAt(targetFieldIndex);
+            if (targetEntity.isPresent()) targetEntity.get().beforeEntityEnters(this, dir);
+            fieldIndex.increment(moveOffset);
         }
     }
 
@@ -80,12 +92,12 @@ public class BoardState {
         public ExpandoEntity(int initialFieldIndex) {
             super(Type.EXPANDO, initialFieldIndex);
         }
-        @Override public boolean canPlayerEnter(Direction dir) { return true; }
-        @Override public void beforePlayerEnters(Direction dir) {
-            super.beforePlayerEnters(dir);
+        @Override public boolean canEnter(Entity e, Direction dir) { return true; }
+        @Override public void beforeEntityEnters(Entity e, Direction dir) {
+            super.beforeEntityEnters(e, dir);
             entities.remove(this);
         }
-        @Override public boolean removeTailOnPass() { return false; }
+        @Override public boolean removePlayerTailOnEnter() { return false; }
     }
 
     public class DoorEntity extends Entity {
@@ -104,11 +116,15 @@ public class BoardState {
             }));
             Values.or(allButtonsDown, isPlayerCrossing).connectNotify(isOpen.slot());
         }
-        @Override public boolean canPlayerEnter(Direction dir) { return isOpen.get(); }
-        @Override public void beforePlayerEnters(Direction dir) {
+        @Override public boolean canEnter(Entity e, Direction dir) { return isOpen.get(); }
+        @Override public void beforeEntityEnters(Entity e, Direction dir) {
+            super.beforeEntityEnters(e, dir);
             isPlayerCrossing.update(true);
         }
-        @Override public void afterPlayerLeft() { isPlayerCrossing.update(false); }
+        @Override public void afterEntityLeft(Entity e) {
+            super.afterEntityLeft(e);
+            isPlayerCrossing.update(false);
+        }
     }
 
     public class ButtonEntity extends Entity {
@@ -120,9 +136,15 @@ public class BoardState {
             super(Type.BUTTON, initialFieldIndex);
             this.doorLinkIndex = doorLinkIndex;
         }
-        @Override public boolean canPlayerEnter(Direction dir) { return true; }
-        @Override public void beforePlayerEnters(Direction dir) { isDown.update(true); }
-        @Override public void afterPlayerLeft() { isDown.update(false); }
+        @Override public boolean canEnter(Entity e, Direction dir) { return true; }
+        @Override public void beforeEntityEnters(Entity e, Direction dir) {
+            super.beforeEntityEnters(e, dir);
+            isDown.update(true);
+        }
+        @Override public void afterEntityLeft(Entity e) {
+            super.afterEntityLeft(e);
+            isDown.update(false);
+        }
     }
 
     public final Level level;
@@ -141,7 +163,7 @@ public class BoardState {
         }
 
         for (int fieldIndex : level.pushEntity) {
-            entities.add(new PushEntity(fieldIndex));
+            entities.add(new PusherEntity(fieldIndex));
         }
         for (Integer fieldIndex : level.expandoEntity) {
             entities.add(new ExpandoEntity(fieldIndex));
@@ -170,7 +192,7 @@ public class BoardState {
         if (!canMoveHere(pos)) return false;
         Optional<Entity> target = entityAt(toIndex(level.dim, pos));
         if (target.isPresent()
-                && !target.get().canPlayerEnter(dir)) {
+                && !target.get().canEnter(playerEntity, dir)) {
             return false;
         }
         return true;
@@ -181,29 +203,19 @@ public class BoardState {
         boolean isFreshHead = !playerEntity.tail.contains(targetHeadIndex);
         Optional<Entity> targetEntity = entityAt(targetHeadIndex);
         if (isFreshHead && targetEntity.isPresent()) {
-            log.debug("beforePlayerEnters", "entity", targetEntity.get());
-            targetEntity.get().beforePlayerEnters(dir);
+            targetEntity.get().beforeEntityEnters(playerEntity, dir);
         }
         playerEntity.tail.remove(Integer.valueOf(targetHeadIndex));
         playerEntity.tail.add(0, playerEntity.fieldIndex.get());
         playerEntity.fieldIndex.update(targetHeadIndex);
 
-        if (isFreshHead && (!targetEntity.isPresent() || (targetEntity.isPresent() && targetEntity.get().removeTailOnPass()))) {
+        if (isFreshHead && (!targetEntity.isPresent() || (targetEntity.isPresent() && targetEntity.get().removePlayerTailOnEnter()))) {
             int removedFieldIndex = playerEntity.tail.remove(playerEntity.tail.size() - 1);
             Optional<Entity> entity = entityAt(removedFieldIndex);
             if (entity.isPresent()) {
-                log.debug("afterPlayerLeft", "entity", entity.get());
-                entity.get().afterPlayerLeft();
+                entity.get().afterEntityLeft(playerEntity);
             }
         }
-    }
-
-    private boolean canMoveEntity(Entity entity, Direction dir) {
-        Point targetPos = toPoint(level.dim, entity.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
-        if (!canMoveHere(targetPos)) return false;
-        Optional<Entity> targetEntity = entityAt(toIndex(level.dim, targetPos));
-        if (targetEntity.isPresent() && !canMoveEntity(targetEntity.get(), dir)) return false;
-        return true;
     }
 
     private Optional<Entity> entityAt(int fieldIndex) {
