@@ -70,7 +70,10 @@ public class BoardState {
 
     private boolean canMovePlayer(Direction dir) {
         Point pos = toPoint(level.dim, playerHead.get()).addLocal(dir.x(), dir.y());
-        return canMovePiece(pos, dir, new HashSet<Block>());
+        if (!canMoveHere(pos)) return false;
+        Optional<Block> target = blockAt(toIndex(level.dim, pos));
+        if (target.isPresent() && !canMoveBlock(target.get(), dir, new HashSet<Block>())) return false;
+        return true;
     }
 
     private void movePlayer(Direction dir) {
@@ -80,7 +83,8 @@ public class BoardState {
         playerTail.add(0, playerHead.get());
         playerHead.update(newHeadFieldIndex);
         if (!removed) playerTail.remove(playerTail.size() - 1);
-        movePiece(newHeadPos, dir, new HashSet<Block>());
+        Optional<Block> target = blockAt(toIndex(level.dim, newHeadPos));
+        if (target.isPresent()) moveBlock(target.get(), toIndex(level.dim, dir.x(), dir.y()), new HashSet<Block>());
     }
 
     private boolean canMoveBlock(Block block, Direction dir, Set<Block> checkedBlocks) {
@@ -99,11 +103,6 @@ public class BoardState {
         Optional<Block> target = blockAt(toIndex(level.dim, pos));
         if (target.isPresent() && !canMoveBlock(target.get(), dir, checkedBlocks)) return false;
         return true;
-    }
-
-    private void movePiece(Point pos, Direction dir, Set<Block> movedBlocks) {
-        Optional<Block> target = blockAt(toIndex(level.dim, pos));
-        if (target.isPresent()) moveBlock(target.get(), toIndex(level.dim, dir.x(), dir.y()), movedBlocks);
     }
 
     private Optional<Block> blockAt(int fieldIndex) {
