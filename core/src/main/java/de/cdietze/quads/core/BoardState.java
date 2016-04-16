@@ -21,7 +21,7 @@ public class BoardState {
 
     public static abstract class Entity {
         enum Type {
-            WALL, PLAIN, EXPANDO, DOOR, BUTTON;
+            PLAYER, WALL, PLAIN, EXPANDO, DOOR, BUTTON;
         }
 
         public final Type type;
@@ -32,7 +32,7 @@ public class BoardState {
             fieldIndex = new IntValue(initialFieldIndex);
         }
 
-        public abstract boolean canPlayerEnter(Direction dir);
+        public boolean canPlayerEnter(Direction dir) { return false; }
         public void beforePlayerEnters(Direction dir) { }
         public void afterPlayerLeft() { }
         public boolean removeTailOnPass() { return true; }
@@ -44,6 +44,17 @@ public class BoardState {
                     .add("fieldIndex", fieldIndex)
                     .toString();
         }
+    }
+
+    public class PlayerEntity extends Entity {
+        public PlayerEntity(int fieldIndex) {
+            super(Type.PLAYER, fieldIndex);
+        }
+        /**
+         * The field indexes that make up the worm.
+         * The order is its age. I.e., the last element is the next to be removed.
+         */
+        public final RList<Integer> tail = RList.create();
     }
 
     public class WallEntity extends Entity {
@@ -118,17 +129,12 @@ public class BoardState {
 
     public final RList<Entity> entities = RList.create();
 
-    public final IntValue playerHead;
-    /**
-     * The field indexes that make up the worm.
-     * The order is its age. I.e., the last element is the next to be removed.
-     */
-    public final RList<Integer> playerTail = RList.create();
+    public final PlayerEntity playerEntity;
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
 
-        playerHead = new IntValue(level.playerStart);
+        playerEntity = new PlayerEntity(level.playerStart);
 
         for (int fieldIndex : level.walls) {
             entities.add(new WallEntity(fieldIndex));
@@ -160,7 +166,7 @@ public class BoardState {
     }
 
     private boolean canMovePlayer(Direction dir) {
-        Point pos = toPoint(level.dim, playerHead.get()).addLocal(dir.x(), dir.y());
+        Point pos = toPoint(level.dim, playerEntity.fieldIndex.get()).addLocal(dir.x(), dir.y());
         if (!canMoveHere(pos)) return false;
         Optional<Entity> target = entityAt(toIndex(level.dim, pos));
         if (target.isPresent()
@@ -171,19 +177,19 @@ public class BoardState {
     }
 
     private void movePlayer(Direction dir) {
-        int targetHeadIndex = addDirToIndex(level.dim, playerHead.get(), dir);
-        boolean isFreshHead = !playerTail.contains(targetHeadIndex);
+        int targetHeadIndex = addDirToIndex(level.dim, playerEntity.fieldIndex.get(), dir);
+        boolean isFreshHead = !playerEntity.tail.contains(targetHeadIndex);
         Optional<Entity> targetEntity = entityAt(targetHeadIndex);
         if (isFreshHead && targetEntity.isPresent()) {
             log.debug("beforePlayerEnters", "entity", targetEntity.get());
             targetEntity.get().beforePlayerEnters(dir);
         }
-        playerTail.remove(Integer.valueOf(targetHeadIndex));
-        playerTail.add(0, playerHead.get());
-        playerHead.update(targetHeadIndex);
+        playerEntity.tail.remove(Integer.valueOf(targetHeadIndex));
+        playerEntity.tail.add(0, playerEntity.fieldIndex.get());
+        playerEntity.fieldIndex.update(targetHeadIndex);
 
         if (isFreshHead && (!targetEntity.isPresent() || (targetEntity.isPresent() && targetEntity.get().removeTailOnPass()))) {
-            int removedFieldIndex = playerTail.remove(playerTail.size() - 1);
+            int removedFieldIndex = playerEntity.tail.remove(playerEntity.tail.size() - 1);
             Optional<Entity> entity = entityAt(removedFieldIndex);
             if (entity.isPresent()) {
                 log.debug("afterPlayerLeft", "entity", entity.get());
