@@ -7,12 +7,22 @@ import react.RList;
 
 import java.util.Objects;
 
-public class BoardState {
-    public static class Piece {
-        public final IntValue fieldIndex;
+import static de.cdietze.quads.core.PointUtils.toPoint;
 
-        public Piece(int initialPos) {
-            this.fieldIndex = new IntValue(initialPos);
+public class BoardState {
+
+    enum BlockType {
+        PLAYER, PLAIN;
+    }
+
+    public static class Block {
+        public final BlockType type;
+        public final IntValue fieldIndex;
+        public final RList<Integer> pieceOffsets = RList.create();
+        public Block(BlockType type, int initialFieldIdex) {
+            this.type = type;
+            fieldIndex = new IntValue(initialFieldIdex);
+            pieceOffsets.add(0);
         }
 
         @Override
@@ -25,22 +35,29 @@ public class BoardState {
 
     public final Level level;
 
-    public final RList<Piece> pieces = RList.create();
+    public final RList<Block> blocks = RList.create();
 
-    public final Piece playerPiece;
+    public final Block playerBlock;
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
-        playerPiece = new Piece(0);
+        playerBlock = new Block(BlockType.PLAYER, 0);
         for (int pos = 1; pos < level.fieldCount; pos += 2) {
-            pieces.add(new Piece(pos));
+            Block block = new Block(BlockType.PLAIN, pos);
+            blocks.add(block);
+            if (pos % 3 == 0) {
+                block.pieceOffsets.add(1);
+            }
         }
     }
 
     public void tryMovePlayer(Direction dir) {
-        Point point = PointUtils.toPoint(level.dim, playerPiece.fieldIndex.get());
-        Point newPoint = point.add(dir.x(), dir.y());
-        if (!level.rect.contains(newPoint)) return;
-        playerPiece.fieldIndex.update(PointUtils.toIndex(level.dim, newPoint));
+        for (int offset : playerBlock.pieceOffsets) {
+            Point newPos = toPoint(level.dim, playerBlock.fieldIndex.get() + offset, tmp).addLocal(dir.x(), dir.y());
+            if (!level.rect.contains(newPos)) return;
+        }
+        playerBlock.fieldIndex.update(PointUtils.toIndex(level.dim, toPoint(level.dim, playerBlock.fieldIndex.get(), tmp).addLocal(dir.x(), dir.y())));
     }
+
+    private Point tmp = new Point();
 }
