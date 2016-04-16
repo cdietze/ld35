@@ -222,6 +222,18 @@ public class BoardScreen extends Screen {
                         return createPieceLayer();
                     case EXPANDO:
                         return createPieceLayer().setTint(0xffff0000);
+                    case BUTTON:
+                        return createPieceLayer().setTint(0xff0000ff);
+                    case DOOR: {
+                        BoardState.DoorBlock door = (BoardState.DoorBlock) block;
+                        final Layer layer = createPieceLayer();
+                        door.isOpen.connectNotify(new Slot<Boolean>() {
+                            @Override public void onEmit(Boolean isOpen) {
+                                layer.setTint(isOpen ? 0xff0000ff : 0xff000099);
+                            }
+                        });
+                        return layer;
+                    }
                     default:
                         throw new AssertionError();
                 }

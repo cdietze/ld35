@@ -7,8 +7,12 @@ import playn.scene.Pointer;
 import playn.scene.SceneGame;
 import tripleplay.game.ScreenStack;
 import tripleplay.game.trans.SlideTransition;
+import tripleplay.util.Logger;
 
 public class MainGame extends SceneGame {
+    static {
+        Logger.levels.setDefault(Logger.Level.INFO);
+    }
 
     public final ScreenStack screens = new ScreenStack(this, rootLayer) {
         @Override

@@ -6,6 +6,9 @@ import pythagoras.i.IPoint;
 import pythagoras.i.Point;
 import react.IntValue;
 import react.RList;
+import react.Value;
+import react.Values;
+import tripleplay.util.Logger;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -14,9 +17,10 @@ import java.util.Set;
 import static de.cdietze.quads.core.PointUtils.*;
 
 public class BoardState {
+    public static final Logger log = new Logger("state");
 
     enum BlockType {
-        PLAIN, EXPANDO;
+        PLAIN, EXPANDO, DOOR, BUTTON;
     }
 
     public static abstract class Block {
@@ -30,8 +34,9 @@ public class BoardState {
             pieceOffsets.add(0);
         }
 
-        public boolean canPlayerEnter(Direction dir) { return false; }
-        public void beforePlayerEnters(Direction dir) {}
+        public abstract boolean canPlayerEnter(Direction dir);
+        public void beforePlayerEnters(Direction dir) { }
+        public void afterPlayerLeft() { }
         public boolean removeTailOnPass() { return true; }
 
         @Override
@@ -51,6 +56,7 @@ public class BoardState {
             return canMoveBlock(this, dir, new HashSet<Block>());
         }
         @Override public void beforePlayerEnters(Direction dir) {
+            super.beforePlayerEnters(dir);
             int moveOffset = toIndex(level.dim, dir.x(), dir.y());
             moveBlock(this, moveOffset, new HashSet<Block>());
         }
@@ -62,9 +68,44 @@ public class BoardState {
         }
         @Override public boolean canPlayerEnter(Direction dir) { return true; }
         @Override public void beforePlayerEnters(Direction dir) {
+            super.beforePlayerEnters(dir);
             blocks.remove(this);
         }
         @Override public boolean removeTailOnPass() { return false; }
+    }
+
+    public class DoorBlock extends Block {
+
+        public final Value<Boolean> isOpen = Value.create(false);
+        private final Value<Boolean> isPlayerCrossing = Value.create(false);
+
+        public DoorBlock(int initialFieldIndex) {
+            super(BlockType.DOOR, initialFieldIndex);
+        }
+        public void setButton(ButtonBlock button) {
+            // Keep the door open as long as the player is crossing
+            Values.or(button.isDown, isPlayerCrossing).connectNotify(isOpen.slot());
+        }
+        @Override public boolean canPlayerEnter(Direction dir) { return isOpen.get(); }
+        @Override public void beforePlayerEnters(Direction dir) {
+            isPlayerCrossing.update(true);
+        }
+        @Override public void afterPlayerLeft() {
+            isPlayerCrossing.update(false);
+            isOpen.update(false);
+        }
+    }
+
+    public class ButtonBlock extends Block {
+
+        public final Value<Boolean> isDown = Value.create(false);
+
+        public ButtonBlock(int initialFieldIndex) {
+            super(BlockType.BUTTON, initialFieldIndex);
+        }
+        @Override public boolean canPlayerEnter(Direction dir) { return true; }
+        @Override public void beforePlayerEnters(Direction dir) { isDown.update(true); }
+        @Override public void afterPlayerLeft() { isDown.update(false); }
     }
 
     public final Level level;
@@ -89,6 +130,12 @@ public class BoardState {
         for (Integer fieldIndex : level.expandoBlocks) {
             blocks.add(new ExpandoBlock(fieldIndex));
         }
+
+        ButtonBlock buttonBlock = new ButtonBlock(6);
+        blocks.add(buttonBlock);
+        DoorBlock doorBlock = new DoorBlock(20);
+        blocks.add(doorBlock);
+        doorBlock.setButton(buttonBlock);
     }
 
     public void tryMovePlayer(Direction dir) {
@@ -109,16 +156,23 @@ public class BoardState {
 
     private void movePlayer(Direction dir) {
         int newHeadIndex = addDirToIndex(level.dim, playerHead.get(), dir);
+        boolean isFreshHead = !playerTail.contains(newHeadIndex);
         Optional<Block> target = blockAt(newHeadIndex);
-        if (target.isPresent()) {
+        if (isFreshHead && target.isPresent()) {
+            log.debug("beforePlayerEnters", "block", target.get());
             target.get().beforePlayerEnters(dir);
         }
-        boolean removed = playerTail.remove(Integer.valueOf(newHeadIndex));
+        playerTail.remove(Integer.valueOf(newHeadIndex));
         playerTail.add(0, playerHead.get());
         playerHead.update(newHeadIndex);
 
-        if (!removed && (!target.isPresent() || (target.isPresent() && target.get().removeTailOnPass()))) {
-            playerTail.remove(playerTail.size() - 1);
+        if (isFreshHead && (!target.isPresent() || (target.isPresent() && target.get().removeTailOnPass()))) {
+            int removedFieldIndex = playerTail.remove(playerTail.size() - 1);
+            Optional<Block> block = blockAt(removedFieldIndex);
+            if (block.isPresent()) {
+                log.debug("afterPlayerLeft", "block", block.get());
+                block.get().afterPlayerLeft();
+            }
         }
     }
 
