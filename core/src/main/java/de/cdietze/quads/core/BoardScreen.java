@@ -63,6 +63,7 @@ public class BoardScreen extends Screen {
             fieldLayers = createFieldLayers();
             initPlayerLayer();
             initPiecesLayers();
+            initGoalLayer();
             initInput();
         }
 
@@ -116,6 +117,18 @@ public class BoardScreen extends Screen {
                     }
                 }
             }));
+        }
+
+        private void initGoalLayer() {
+            final GroupLayer group = new GroupLayer();
+            for (int fieldIndex : level.goals) {
+                int x = toX(level.dim, fieldIndex);
+                int y = toY(level.dim, fieldIndex);
+                ImageLayer layer = createPieceLayer();
+                layer.setTint(0xff00ff00);
+                group.addAt(layer, x, y);
+            }
+            gridLayer.add(group);
         }
 
         private Layer createBlockLayer(final BoardState.Block block, final PieceLayerProvider pieceLayerProvider) {

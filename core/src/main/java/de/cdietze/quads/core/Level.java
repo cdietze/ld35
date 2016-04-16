@@ -51,13 +51,18 @@ public class Level {
             case 'P':
                 builder.plainBlocks.add(index);
                 break;
+            case 'p':
+                builder.goals.add(index);
+                break;
+            case '.':
+                break;
             default:
-              //  System.err.println("Warn: unknown char in level description: '" + c + "'");
+                throw new AssertionError("unknown char in level description: '" + c + "'");
         }
     }
 
     public static final String lvl1 = "" +
-            ".h.....\n" +
+            ".......\n" +
             "....P..\n" +
             ".......\n" +
             ".P.H...\n" +
