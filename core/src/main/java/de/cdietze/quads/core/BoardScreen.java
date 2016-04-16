@@ -5,11 +5,10 @@ import de.cdietze.playn_util.ScaledElement;
 import de.cdietze.playn_util.Screen;
 import playn.core.Canvas;
 import playn.core.Image;
-import playn.core.Surface;
 import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
 import playn.scene.Layer;
-import pythagoras.f.Dimension;
+import playn.scene.Pointer;
 import react.Function;
 import react.IntValue;
 import react.RList;
@@ -41,7 +40,7 @@ public class BoardScreen extends Screen {
         root.setSize(plat.graphics().viewSize);
 
         Board board = new Board();
-        ScaledElement boardElement = new ScaledElement(board.layer);
+        ScaledElement boardElement = new ScaledElement(board.rootLayer);
 
         root.add(boardElement.setConstraint(BorderLayout.CENTER));
 
@@ -65,17 +64,22 @@ public class BoardScreen extends Screen {
     }
 
     private final class Board {
-        public final GroupLayer layer = new GroupLayer();
+        public final GroupLayer rootLayer = new GroupLayer();
+        private final GroupLayer gridLayer = new GroupLayer();
         private final Level level = new Level();
 
         private final List<Layer> fieldLayers;
 
         public Board() {
-            layer.setSize(level.dim.width(), level.dim.height()).setOrigin(Layer.Origin.CENTER);
-            Layer backgroundLayer = Layers.solid(0xAA000000, level.dim.width(), level.dim.height());
-            layer.add(backgroundLayer.setDepth(-1f));
+            rootLayer.setSize(level.dim.width(), level.dim.height()).setOrigin(Layer.Origin.CENTER);
+            rootLayer.addAt(gridLayer, .5f, .5f);
+            Layer backgroundLayer = Layers.solid(0xAA000000, rootLayer.width(), rootLayer.height());
+            rootLayer.add(backgroundLayer.setDepth(-1f));
             fieldLayers = createFieldLayers();
+            initPiecesLayers();
+        }
 
+        private void initPiecesLayers() {
             final List<Layer> pieceLayers = new ArrayList<>();
             state.pieces.connectNotify(new RList.Listener<BoardState.Piece>() {
                 @Override
@@ -83,7 +87,7 @@ public class BoardScreen extends Screen {
                     ImageLayer pieceLayer = createPieceLayer();
                     int x = toX(level.dim, piece.pos.get());
                     int y = toY(level.dim, piece.pos.get());
-                    layer.addAt(pieceLayer, x, y);
+                    gridLayer.addAt(pieceLayer, x, y);
                     pieceLayers.add(index, pieceLayer);
                 }
 
@@ -97,10 +101,18 @@ public class BoardScreen extends Screen {
         private List<Layer> createFieldLayers() {
             ImmutableList.Builder<Layer> builder = ImmutableList.builder();
             for (int fieldIndex = 0; fieldIndex < level.fieldCount; ++fieldIndex) {
-                Layer fieldLayer = BoardScreen.createFieldLayer().setOrigin(Layer.Origin.CENTER);
+                Layer fieldLayer = BoardScreen.createFieldLayer();
                 int x = toX(level.dim, fieldIndex);
                 int y = toY(level.dim, fieldIndex);
-                layer.addAt(fieldLayer, x, y);
+                gridLayer.addAt(fieldLayer, x, y);
+                fieldLayer.events().connect(new Pointer.Listener() {
+                                                @Override
+                                                public void onStart(Pointer.Interaction iact) {
+                                                    System.out.println("click on " + this);
+                                                    // gameState.explore(fieldIndex);
+                                                }
+                                            }
+                );
                 builder.add(fieldLayer);
             }
             return builder.build();
@@ -144,21 +156,7 @@ public class BoardScreen extends Screen {
     }
 
     private static Layer createFieldLayer() {
-        final Dimension size = new Dimension(1, 1);
-        final int bgColor = 0xff555555;
-        final int borderColor = 0xff000000;
-        final float thickness = 0.05f;
-        return new Layer() {
-            @Override
-            protected void paintImpl(Surface surf) {
-                float width = size.width(), height = size.height();
-                surf.setFillColor(bgColor).fillRect(0, 0, width, height);
-                surf.setFillColor(borderColor).
-                        fillRect(0, 0, width, thickness).
-                        fillRect(0, 0, thickness, height).
-                        fillRect(width - thickness, 0, thickness, height).
-                        fillRect(0, height - thickness, width, thickness);
-            }
-        };
+        Layer l = Layers.solid(0xff555555, .9f, .9f).setOrigin(Layer.Origin.CENTER);
+        return l;
     }
 }
