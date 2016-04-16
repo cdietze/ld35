@@ -17,12 +17,13 @@ import static de.cdietze.quads.core.PointUtils.toPoint;
 public class BoardState {
 
     enum BlockType {
-        PLAYER, PLAIN;
+        PLAIN;
     }
 
     public static class Block {
         public final BlockType type;
         public final IntValue fieldIndex;
+
         public final RList<Integer> pieceOffsets = RList.create();
         public Block(BlockType type, int initialFieldIdex) {
             this.type = type;
@@ -42,25 +43,44 @@ public class BoardState {
 
     public final RList<Block> blocks = RList.create();
 
-    public final Block playerBlock;
+    public final IntValue playerHead;
+    /**
+     * The field indexes that make up the worm.
+     * The order is its age. I.e., the last element is the next to be removed.
+     */
+    public final RList<Integer> playerTail = RList.create();
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
-        playerBlock = new Block(BlockType.PLAYER, 0);
-        playerBlock.pieceOffsets.add(1);
-        playerBlock.pieceOffsets.add(6);
         Block block = new Block(BlockType.PLAIN, 8);
         block.pieceOffsets.add(6);
         blocks.add(block);
+
+        playerHead = new IntValue(1);
+        playerTail.add(0);
+        playerTail.add(6);
+        playerTail.add(12);
+        playerTail.add(18);
     }
 
     public void tryMovePlayer(Direction dir) {
         if (!canMovePlayer(dir)) return;
-        movePlayer(toIndex(level.dim, dir.x(), dir.y()));
+        movePlayer(dir);
     }
 
     private boolean canMovePlayer(Direction dir) {
-        return canMoveBlock(playerBlock, dir, new HashSet<Block>());
+        Point pos = toPoint(level.dim, playerHead.get()).addLocal(dir.x(), dir.y());
+        return canMovePiece(pos, dir, new HashSet<Block>());
+    }
+
+    private void movePlayer(Direction dir) {
+        Point newHeadPos = toPoint(level.dim, playerHead.get()).addLocal(dir.x(), dir.y());
+        int newHeadFieldIndex = PointUtils.toIndex(level.dim, newHeadPos);
+        boolean removed = playerTail.remove(Integer.valueOf(newHeadFieldIndex));
+        playerTail.add(0, playerHead.get());
+        playerHead.update(newHeadFieldIndex);
+        if (!removed) playerTail.remove(playerTail.size() - 1);
+        movePiece(newHeadPos, dir, new HashSet<Block>());
     }
 
     private boolean canMoveBlock(Block block, Direction dir, Set<Block> checkedBlocks) {
@@ -69,11 +89,21 @@ public class BoardState {
         checkedBlocks.add(block);
         for (int offset : block.pieceOffsets) {
             Point newPos = toPoint(level.dim, block.fieldIndex.get() + offset, tmp).addLocal(dir.x(), dir.y());
-            if (!canMoveBlockHere(newPos)) return false;
-            Optional<Block> target = blockAt(toIndex(level.dim, newPos));
-            if (target.isPresent() && !canMoveBlock(target.get(), dir, checkedBlocks)) return false;
+            if (!canMovePiece(newPos, dir, checkedBlocks)) return false;
         }
         return true;
+    }
+
+    private boolean canMovePiece(Point pos, Direction dir, Set<Block> checkedBlocks) {
+        if (!canMoveHere(pos)) return false;
+        Optional<Block> target = blockAt(toIndex(level.dim, pos));
+        if (target.isPresent() && !canMoveBlock(target.get(), dir, checkedBlocks)) return false;
+        return true;
+    }
+
+    private void movePiece(Point pos, Direction dir, Set<Block> movedBlocks) {
+        Optional<Block> target = blockAt(toIndex(level.dim, pos));
+        if (target.isPresent()) moveBlock(target.get(), toIndex(level.dim, dir.x(), dir.y()), movedBlocks);
     }
 
     private Optional<Block> blockAt(int fieldIndex) {
@@ -85,12 +115,8 @@ public class BoardState {
         return Optional.absent();
     }
 
-    private boolean canMoveBlockHere(IPoint pos) {
+    private boolean canMoveHere(IPoint pos) {
         return level.rect.contains(pos);
-    }
-
-    private void movePlayer(int moveOffset) {
-        moveBlock(playerBlock, moveOffset, new HashSet<Block>());
     }
 
     private void moveBlock(Block block, int moveOffset, Set<Block> movedBlocks) {
