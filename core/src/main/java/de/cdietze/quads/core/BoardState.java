@@ -48,8 +48,8 @@ public class BoardState {
         @Override public boolean canPlayerEnter(Direction dir) { return false; }
     }
 
-    private class PlainBlock extends Block {
-        public PlainBlock(int initialFieldIndex) {
+    private class PushBlock extends Block {
+        public PushBlock(int initialFieldIndex) {
             super(BlockType.PLAIN, initialFieldIndex);
         }
         @Override public boolean canPlayerEnter(Direction dir) {
@@ -132,7 +132,7 @@ public class BoardState {
         }
 
         for (int fieldIndex : level.plainBlocks) {
-            blocks.add(new PlainBlock(fieldIndex));
+            blocks.add(new PushBlock(fieldIndex));
         }
         for (Integer fieldIndex : level.expandoBlocks) {
             blocks.add(new ExpandoBlock(fieldIndex));
