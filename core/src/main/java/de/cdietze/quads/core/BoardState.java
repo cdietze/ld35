@@ -2,8 +2,9 @@ package de.cdietze.quads.core;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import pythagoras.i.IPoint;
 import pythagoras.i.Point;
 import react.*;
@@ -33,7 +34,7 @@ public class BoardState {
         }
 
         public boolean canEnter(Entity entity, Direction dir) { return false; }
-        public boolean removePlayerTailOnEnter() { return true; }
+        public boolean keepPlayerTailOnEnter() { return false; }
         public void beforeEntityEnters(Entity entity, Direction dir) {
             log.debug("beforeEntityEnters", "this", this, "entity", entity);
         }
@@ -73,8 +74,10 @@ public class BoardState {
         @Override public boolean canEnter(Entity e, Direction dir) {
             Point targetPos = toPoint(level.dim, fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
             if (!canMoveHere(targetPos)) return false;
-            Optional<Entity> targetEntity = entityAt(toIndex(level.dim, targetPos));
-            if (targetEntity.isPresent() && !targetEntity.get().canEnter(this, dir)) return false;
+            List<Entity> targetEntities = entitiesAt(toIndex(level.dim, targetPos));
+            for (Entity targetEntity : targetEntities) {
+                if (!targetEntity.canEnter(this, dir)) return false;
+            }
             return true;
         }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
@@ -82,8 +85,10 @@ public class BoardState {
             int moveOffset = toIndex(level.dim, dir.x(), dir.y());
             // We move the other entities before moving ourself to avoid overlaps
             int targetFieldIndex = fieldIndex.get() + moveOffset;
-            Optional<Entity> targetEntity = entityAt(targetFieldIndex);
-            if (targetEntity.isPresent()) targetEntity.get().beforeEntityEnters(this, dir);
+            List<Entity> targetEntities = entitiesAt(targetFieldIndex);
+            for (Entity targetEntity : targetEntities) {
+                targetEntity.beforeEntityEnters(this, dir);
+            }
             fieldIndex.increment(moveOffset);
         }
     }
@@ -97,7 +102,7 @@ public class BoardState {
             super.beforeEntityEnters(e, dir);
             entities.remove(this);
         }
-        @Override public boolean removePlayerTailOnEnter() { return false; }
+        @Override public boolean keepPlayerTailOnEnter() { return true; }
     }
 
     public class DoorEntity extends Entity {
@@ -190,10 +195,9 @@ public class BoardState {
     private boolean canMovePlayer(Direction dir) {
         Point pos = toPoint(level.dim, playerEntity.fieldIndex.get()).addLocal(dir.x(), dir.y());
         if (!canMoveHere(pos)) return false;
-        Optional<Entity> target = entityAt(toIndex(level.dim, pos));
-        if (target.isPresent()
-                && !target.get().canEnter(playerEntity, dir)) {
-            return false;
+        List<Entity> targets = entitiesAt(toIndex(level.dim, pos));
+        for (Entity target : targets) {
+            if (!target.canEnter(playerEntity, dir)) return false;
         }
         return true;
     }
@@ -201,40 +205,40 @@ public class BoardState {
     private void movePlayer(Direction dir) {
         int targetHeadIndex = addDirToIndex(level.dim, playerEntity.fieldIndex.get(), dir);
         boolean isFreshHead = !playerEntity.tail.contains(targetHeadIndex);
-        Optional<Entity> targetEntity = entityAt(targetHeadIndex);
-        if (isFreshHead && targetEntity.isPresent()) {
-            targetEntity.get().beforeEntityEnters(playerEntity, dir);
+        List<Entity> targetEntities = entitiesAt(targetHeadIndex);
+        for (Entity targetEntity : targetEntities) {
+            targetEntity.beforeEntityEnters(playerEntity, dir);
         }
         playerEntity.tail.remove(Integer.valueOf(targetHeadIndex));
         playerEntity.tail.add(0, playerEntity.fieldIndex.get());
         playerEntity.fieldIndex.update(targetHeadIndex);
 
-        if (isFreshHead && (!targetEntity.isPresent() || (targetEntity.isPresent() && targetEntity.get().removePlayerTailOnEnter()))) {
-            int removedFieldIndex = playerEntity.tail.remove(playerEntity.tail.size() - 1);
-            Optional<Entity> entity = entityAt(removedFieldIndex);
-            if (entity.isPresent()) {
-                entity.get().afterEntityLeft(playerEntity);
+        if (!isFreshHead) return;
+
+        if (Iterables.any(targetEntities, new Predicate<Entity>() {
+            @Override public boolean apply(Entity entity) {
+                return entity.keepPlayerTailOnEnter();
             }
+        })) {
+            return;
+        }
+
+        int removedFieldIndex = playerEntity.tail.remove(playerEntity.tail.size() - 1);
+        for (Entity entity : entitiesAt(removedFieldIndex)) {
+            entity.afterEntityLeft(playerEntity);
         }
     }
 
-    private Optional<Entity> entityAt(int fieldIndex) {
+    private List<Entity> entitiesAt(int fieldIndex) {
+        List<Entity> result = new ArrayList<>();
         for (Entity entity : entities) {
-            if (entity.fieldIndex.get() == fieldIndex) return Optional.of(entity);
+            if (entity.fieldIndex.get() == fieldIndex) result.add(entity);
         }
-        return Optional.absent();
+        return result;
     }
 
     private boolean canMoveHere(IPoint pos) {
         return level.rect.contains(pos);
-    }
-
-    private void moveEntity(Entity entity, int moveOffset) {
-        // We move the other entities before moving ourself to avoid overlaps
-        int targetFieldIndex = entity.fieldIndex.get() + moveOffset;
-        Optional<Entity> targetEntity = entityAt(targetFieldIndex);
-        if (targetEntity.isPresent()) moveEntity(targetEntity.get(), moveOffset);
-        entity.fieldIndex.increment(moveOffset);
     }
 
     private Point tmp = new Point();
