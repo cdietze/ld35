@@ -77,8 +77,6 @@ public class BoardScreen extends Screen {
             fieldLayers = createFieldLayers();
             initPlayerLayer();
             initPiecesLayers();
-
-            state.playerBlock.pieceOffsets.add(1);
         }
 
         private void initPlayerLayer() {
