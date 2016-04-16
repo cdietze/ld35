@@ -10,7 +10,6 @@ import playn.core.Path;
 import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
 import playn.scene.Layer;
-import pythagoras.i.Point;
 import react.RList;
 import react.Slot;
 import tripleplay.ui.Background;
@@ -141,19 +140,6 @@ public class BoardScreen extends Screen {
                     pieceLayers.add(index, pieceLayer);
 
                     block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(pieceLayer));
-
-                    SwipeListener swipeListener = new SwipeListener();
-                    pieceLayer.events().connect(swipeListener);
-                    swipeListener.completed.connect(new Slot<Direction>() {
-                        @Override
-                        public void onEmit(Direction dir) {
-                            Point point = PointUtils.toPoint(level.dim, block.fieldIndex.get());
-                            Point newPoint = point.add(dir.x(), dir.y());
-                            if (!level.rect.contains(newPoint)) return;
-                            // TODO check collisions with other blocks etc.
-                            block.fieldIndex.update(PointUtils.toIndex(level.dim, newPoint));
-                        }
-                    });
                 }
 
                 @Override
