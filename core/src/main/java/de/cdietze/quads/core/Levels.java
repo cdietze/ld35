@@ -6,9 +6,9 @@ public final class Levels {
     public static final Level level1 = Level.read("" +
             "XX....a\n" +
             "....P..\n" +
-            "......A\n" +
-            ".P.H..X\n" +
-            ".......\n" +
+            ".....WA\n" +
+            ".P.S.WX\n" +
+            ".....WW\n" +
             ".......\n" +
             "...G...");
 }

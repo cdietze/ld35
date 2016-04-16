@@ -216,6 +216,8 @@ public class BoardScreen extends Screen {
         private PieceLayerProvider pieceLayerProvider = new PieceLayerProvider() {
             @Override public Layer createLayer(BoardState.Block block, int offset) {
                 switch (block.type) {
+                    case WALL:
+                        return createFieldLayer().setTint(0xff222222);
                     case PLAIN:
                         return createPieceLayer();
                     case EXPANDO:
@@ -233,7 +235,7 @@ public class BoardScreen extends Screen {
                         return layer;
                     }
                     default:
-                        throw new AssertionError();
+                        throw new AssertionError("Unknown block type: " + block.type);
                 }
             }
         };
