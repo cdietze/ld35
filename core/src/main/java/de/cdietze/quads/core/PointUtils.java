@@ -40,8 +40,12 @@ public final class PointUtils {
         return toIndex(dim, p.x(), p.y());
     }
 
+    public static Point toPoint(IDimension dim, int index, Point p) {
+        return p.set(index % dim.width(), index / dim.width());
+    }
+
     public static Point toPoint(IDimension dim, int index) {
-        return new Point(index % dim.width(), index / dim.width());
+        return toPoint(dim, index, new Point());
     }
 
     public static boolean contains(IDimension dim, int index) {
@@ -96,7 +100,6 @@ public final class PointUtils {
     public static BitSet neighbors(IDimension dim, int index) {
         return neighbors(dim, index, new BitSet());
     }
-
 
     public static int randomIndex(Random random, IDimension dim) {
         return random.nextInt(dim.width() * dim.height());

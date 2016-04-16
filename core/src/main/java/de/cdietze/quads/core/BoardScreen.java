@@ -77,13 +77,14 @@ public class BoardScreen extends Screen {
             fieldLayers = createFieldLayers();
             initPlayerLayer();
             initPiecesLayers();
+
+            state.playerBlock.pieceOffsets.add(1);
         }
 
         private void initPlayerLayer() {
-            ImageLayer playerLayer = createPlayerLayer();
+            Layer playerLayer = createBlockLayer(state.playerBlock, pieceLayerProvider);
             playerLayer.setTint(0xffff0000);
             gridLayer.add(playerLayer);
-            state.playerPiece.fieldIndex.connectNotify(moveLayerSlot(playerLayer));
             plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
 
                 @Override public void onEmit(Keyboard.KeyEvent event) {
@@ -106,43 +107,62 @@ public class BoardScreen extends Screen {
             });
         }
 
+        private Layer createBlockLayer(final BoardState.Block block, final PieceLayerProvider pieceLayerProvider) {
+            final GroupLayer group = new GroupLayer();
+            final List<Layer> layers = new ArrayList<>();
+            block.pieceOffsets.connectNotify(new RList.Listener<Integer>() {
+                @Override public void onAdd(int index, Integer offset) {
+                    int x = toX(level.dim, offset);
+                    int y = toY(level.dim, offset);
+                    Layer layer = pieceLayerProvider.createLayer(block, offset);
+                    group.addAt(layer, x, y);
+                    layers.add(index, layer);
+                }
+                @Override public void onRemove(int index, Integer offset) {
+                    layers.remove(index).close();
+                }
+            });
+            block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(group));
+            return group;
+        }
+
         private void initPiecesLayers() {
             final List<Layer> pieceLayers = new ArrayList<>();
-            state.pieces.connectNotify(new RList.Listener<BoardState.Piece>() {
+            state.blocks.connectNotify(new RList.Listener<BoardState.Block>() {
                 @Override
-                public void onAdd(final int index, final BoardState.Piece piece) {
-                    final ImageLayer pieceLayer = createPieceLayer();
+                public void onAdd(final int index, final BoardState.Block block) {
+                    final Layer pieceLayer = createBlockLayer(block, pieceLayerProvider);
                     gridLayer.add(pieceLayer);
                     pieceLayers.add(index, pieceLayer);
 
-                    piece.fieldIndex.connectNotify(moveLayerSlot(pieceLayer));
+                    block.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(pieceLayer));
 
                     SwipeListener swipeListener = new SwipeListener();
                     pieceLayer.events().connect(swipeListener);
                     swipeListener.completed.connect(new Slot<Direction>() {
                         @Override
                         public void onEmit(Direction dir) {
-                            Point point = PointUtils.toPoint(level.dim, piece.fieldIndex.get());
+                            Point point = PointUtils.toPoint(level.dim, block.fieldIndex.get());
                             Point newPoint = point.add(dir.x(), dir.y());
                             if (!level.rect.contains(newPoint)) return;
-                            // TODO check collisions with other pieces etc.
-                            piece.fieldIndex.update(PointUtils.toIndex(level.dim, newPoint));
+                            // TODO check collisions with other blocks etc.
+                            block.fieldIndex.update(PointUtils.toIndex(level.dim, newPoint));
                         }
                     });
                 }
 
                 @Override
-                public void onRemove(int index, BoardState.Piece elem) {
+                public void onRemove(int index, BoardState.Block elem) {
                     pieceLayers.remove(index).close();
                 }
             });
         }
-        private Slot<Integer> moveLayerSlot(final ImageLayer pieceLayer) {
+        private Slot<Integer> moveLayerWithFieldIndexSlot(final Layer layer) {
             return new Slot<Integer>() {
-                @Override public void onEmit(Integer newFieldIndex) {
-                    int x = toX(level.dim, newFieldIndex);
-                    int y = toY(level.dim, newFieldIndex);
-                    pieceLayer.setTranslation(x, y);
+                @Override public void onEmit(Integer fieldIndex) {
+                    int x = toX(level.dim, fieldIndex);
+                    int y = toY(level.dim, fieldIndex);
+                    layer.setTranslation(x, y);
                 }
             };
         }
@@ -171,6 +191,19 @@ public class BoardScreen extends Screen {
             imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
             return imageLayer;
         }
+
+        private PieceLayerProvider pieceLayerProvider = new PieceLayerProvider() {
+            @Override public Layer createLayer(BoardState.Block block, int offset) {
+                switch (block.type) {
+                    case PLAYER:
+                        return createPlayerLayer();
+                    case PLAIN:
+                        return createPieceLayer();
+                    default:
+                        throw new AssertionError();
+                }
+            }
+        };
 
         private Image circleImage = drawCircleImage();
         private Image crossImage = drawCrossImage();
@@ -215,4 +248,9 @@ public class BoardScreen extends Screen {
         Layer l = Layers.solid(0xff555555, .9f, .9f).setOrigin(Layer.Origin.CENTER);
         return l;
     }
+
+    interface PieceLayerProvider {
+        Layer createLayer(BoardState.Block block, int offset);
+    }
+
 }
