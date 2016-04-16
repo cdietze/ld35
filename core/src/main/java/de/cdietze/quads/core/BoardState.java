@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkState;
 import static de.cdietze.quads.core.PointUtils.*;
 
 public class BoardState {
@@ -100,9 +101,10 @@ public class BoardState {
         public ExpandoEntity(int initialFieldIndex) {
             super(Type.EXPANDO, initialFieldIndex);
         }
-        @Override public boolean canEnter(Entity e, Direction dir) { return true; }
+        @Override public boolean canEnter(Entity e, Direction dir) { return e.type == Type.PLAYER; }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
             super.beforeEntityEnters(e, dir);
+            checkState(e.type == Type.PLAYER);
             entities.remove(this);
         }
         @Override public boolean keepPlayerTailOnEnter() { return true; }
@@ -112,7 +114,7 @@ public class BoardState {
 
         public final int doorLinkIndex;
         public final Value<Boolean> isOpen = Value.create(false);
-        private final Value<Boolean> isPlayerCrossing = Value.create(false);
+        private final Value<Boolean> isOccupied = Value.create(false);
 
         public DoorEntity(int doorLinkIndex, int initialFieldIndex, Collection<ButtonEntity> buttons) {
             super(Type.DOOR, initialFieldIndex);
@@ -122,16 +124,16 @@ public class BoardState {
                     return buttonEntity.isDown;
                 }
             }));
-            Values.or(allButtonsDown, isPlayerCrossing).connectNotify(isOpen.slot());
+            Values.or(allButtonsDown, isOccupied).connectNotify(isOpen.slot());
         }
         @Override public boolean canEnter(Entity e, Direction dir) { return isOpen.get(); }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
             super.beforeEntityEnters(e, dir);
-            isPlayerCrossing.update(true);
+            isOccupied.update(true);
         }
         @Override public void afterEntityLeft(Entity e) {
             super.afterEntityLeft(e);
-            isPlayerCrossing.update(false);
+            isOccupied.update(false);
         }
     }
 
