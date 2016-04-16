@@ -10,5 +10,7 @@
 
   <public path="resources" />
 
+  <super-source path="super"/>
+
   <entry-point class='de.cdietze.quads.html.HtmlMain'/>
 </module>
