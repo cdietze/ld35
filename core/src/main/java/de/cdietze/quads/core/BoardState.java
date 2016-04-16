@@ -82,11 +82,14 @@ public class BoardState {
         }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
             super.beforeEntityEnters(e, dir);
+            for (Entity targetEntity : entitiesAt(fieldIndex.get())) {
+                if (targetEntity == this) continue;
+                targetEntity.afterEntityLeft(this);
+            }
             int moveOffset = toIndex(level.dim, dir.x(), dir.y());
             // We move the other entities before moving ourself to avoid overlaps
             int targetFieldIndex = fieldIndex.get() + moveOffset;
-            List<Entity> targetEntities = entitiesAt(targetFieldIndex);
-            for (Entity targetEntity : targetEntities) {
+            for (Entity targetEntity : entitiesAt(targetFieldIndex)) {
                 targetEntity.beforeEntityEnters(this, dir);
             }
             fieldIndex.increment(moveOffset);
