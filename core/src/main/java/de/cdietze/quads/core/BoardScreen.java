@@ -11,6 +11,7 @@ import playn.scene.Layer;
 import playn.scene.Pointer;
 import pythagoras.f.Vector;
 import pythagoras.f.Vectors;
+import pythagoras.i.Point;
 import react.*;
 import tripleplay.ui.*;
 import tripleplay.ui.layout.AxisLayout;
@@ -82,12 +83,31 @@ public class BoardScreen extends Screen {
             final List<Layer> pieceLayers = new ArrayList<>();
             state.pieces.connectNotify(new RList.Listener<BoardState.Piece>() {
                 @Override
-                public void onAdd(int index, BoardState.Piece piece) {
-                    ImageLayer pieceLayer = createPieceLayer();
-                    int x = toX(level.dim, piece.pos.get());
-                    int y = toY(level.dim, piece.pos.get());
-                    gridLayer.addAt(pieceLayer, x, y);
+                public void onAdd(final int index, final BoardState.Piece piece) {
+                    final ImageLayer pieceLayer = createPieceLayer();
+                    gridLayer.add(pieceLayer);
                     pieceLayers.add(index, pieceLayer);
+
+                    piece.pos.connectNotify(new Slot<Integer>() {
+                        @Override public void onEmit(Integer fieldIndex) {
+                            int x = toX(level.dim, piece.pos.get());
+                            int y = toY(level.dim, piece.pos.get());
+                            pieceLayer.setTranslation(x, y);
+                        }
+                    });
+
+                    SwipeListener swipeListener = new SwipeListener();
+                    pieceLayer.events().connect(swipeListener);
+                    swipeListener.completed.connect(new Slot<Direction>() {
+                        @Override
+                        public void onEmit(Direction dir) {
+                            Point point = PointUtils.toPoint(level.dim, piece.pos.get());
+                            Point newPoint = point.add(dir.x(), dir.y());
+                            if (!level.rect.contains(newPoint)) return;
+                            // TODO check collisions with other pieces etc.
+                            piece.pos.update(PointUtils.toIndex(level.dim, newPoint));
+                        }
+                    });
                 }
 
                 @Override
@@ -105,19 +125,10 @@ public class BoardScreen extends Screen {
                 int x = toX(level.dim, fieldIndex);
                 int y = toY(level.dim, fieldIndex);
                 gridLayer.addAt(fieldLayer, x, y);
-                SwipeListener swipeListener = new SwipeListener();
-                fieldLayer.events().connect(swipeListener);
-                swipeListener.completed.connect(new Slot<Direction>() {
-                    @Override
-                    public void onEmit(Direction dir) {
-                        System.out.println("completed: field " + index + ", dir: " + dir);
-                    }
-                });
                 builder.add(fieldLayer);
             }
             return builder.build();
         }
-
 
         private ImageLayer createPieceLayer() {
             ImageLayer imageLayer = new ImageLayer(circleImage);
@@ -183,10 +194,10 @@ public class BoardScreen extends Screen {
             if (vec.x() < -onAxisThreshold && Math.abs(vec.y()) < offAxisTolerance) {
                 completed.emit(Direction.LEFT);
             }
-            if (vec.y() > onAxisThreshold && Math.abs(vec.x()) < offAxisTolerance) {
+            if (vec.y() < -onAxisThreshold && Math.abs(vec.x()) < offAxisTolerance) {
                 completed.emit(Direction.UP);
             }
-            if (vec.y() < -onAxisThreshold && Math.abs(vec.x()) < offAxisTolerance) {
+            if (vec.y() > onAxisThreshold && Math.abs(vec.x()) < offAxisTolerance) {
                 completed.emit(Direction.DOWN);
             }
         }

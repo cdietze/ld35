@@ -1,5 +1,6 @@
 package de.cdietze.quads.core;
 
+import com.google.common.base.MoreObjects;
 import react.IntValue;
 import react.RList;
 
@@ -22,6 +23,13 @@ public class BoardState {
 
         public Piece(int initialPos) {
             this.pos = new IntValue(initialPos);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                    .add("pos", pos)
+                    .toString();
         }
     }
 }
