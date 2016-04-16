@@ -60,16 +60,16 @@ public class BoardScreen extends Screen {
             Layer backgroundLayer = Layers.solid(0xAA000000, rootLayer.width(), rootLayer.height());
             rootLayer.add(backgroundLayer.setDepth(-1f));
             fieldLayers = createFieldLayers();
-            initPlayerLayer();
+            createPlayerLayer(state.playerEntity);
             initEntityLayers();
             initGoalLayer();
             initInput();
         }
 
-        private void initPlayerLayer() {
+        private Layer createPlayerLayer(BoardState.PlayerEntity player) {
             final GroupLayer group = new GroupLayer();
             final List<Layer> layers = new ArrayList<>();
-            state.playerTail.connectNotify(new RList.Listener<Integer>() {
+            player.tail.connectNotify(new RList.Listener<Integer>() {
                 @Override public void onAdd(int index, Integer fieldIndex) {
                     int x = toX(level.dim, fieldIndex);
                     int y = toY(level.dim, fieldIndex);
@@ -85,7 +85,7 @@ public class BoardScreen extends Screen {
             final Layer headLayer = createPlayerLayer();
             headLayer.setTint(0xffff0000);
             group.add(headLayer);
-            state.playerHead.connectNotify(new Slot<Integer>() {
+            player.fieldIndex.connectNotify(new Slot<Integer>() {
                 @Override public void onEmit(Integer headFieldIndex) {
                     int x = toX(level.dim, headFieldIndex);
                     int y = toY(level.dim, headFieldIndex);
@@ -93,6 +93,7 @@ public class BoardScreen extends Screen {
                 }
             });
             gridLayer.add(group);
+            return group;
         }
 
         private void initInput() {
@@ -134,10 +135,9 @@ public class BoardScreen extends Screen {
                 @Override
                 public void onAdd(final int index, final BoardState.Entity entity) {
                     Layer entityLayer = entityLayerProvider.createLayer(entity);
+                    entityLayers.add(index, entityLayer);
                     entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer));
                     gridLayer.add(entityLayer);
-                    entityLayers.add(index, entityLayer);
-
                     entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer));
                 }
 
