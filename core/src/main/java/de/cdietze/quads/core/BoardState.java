@@ -83,13 +83,12 @@ public class BoardState {
 
         playerHead = new IntValue(level.playerStart);
 
-        for (int blockIndex : level.plainBlocks) {
-            Block block = new PlainBlock(blockIndex);
-            blocks.add(block);
+        for (int fieldIndex : level.plainBlocks) {
+            blocks.add(new PlainBlock(fieldIndex));
         }
-
-        blocks.add(new ExpandoBlock(0));
-        blocks.add(new ExpandoBlock(4));
+        for (Integer fieldIndex : level.expandoBlocks) {
+            blocks.add(new ExpandoBlock(fieldIndex));
+        }
     }
 
     public void tryMovePlayer(Direction dir) {

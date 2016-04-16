@@ -15,6 +15,7 @@ public class Level {
     public final int playerStart;
     //    public final List<Integer> blockers;
     public final List<Integer> plainBlocks;
+    public final List<Integer> expandoBlocks;
     public final List<Integer> goals;
 
     private Level(Builder builder) {
@@ -23,6 +24,7 @@ public class Level {
         fieldCount = dim.width * dim.height;
         playerStart = builder.playerStart;
         plainBlocks = ImmutableList.copyOf(builder.plainBlocks);
+        expandoBlocks = ImmutableList.copyOf(builder.expandoBlocks);
         goals = ImmutableList.copyOf(builder.goals);
     }
 
@@ -54,6 +56,9 @@ public class Level {
             case 'p':
                 builder.goals.add(index);
                 break;
+            case 'X':
+                builder.expandoBlocks.add(index);
+                break;
             case '.':
                 break;
             default:
@@ -65,6 +70,7 @@ public class Level {
         public Dimension dim;
         public int playerStart;
         public List<Integer> plainBlocks = new ArrayList<>();
+        public List<Integer> expandoBlocks = new ArrayList<>();
         public List<Integer> goals = new ArrayList<>();
 
         public Builder() {}
