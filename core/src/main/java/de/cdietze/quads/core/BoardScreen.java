@@ -9,6 +9,7 @@ import playn.scene.ImageLayer;
 import playn.scene.Layer;
 import react.RList;
 import react.Slot;
+import tripleplay.anim.Animation;
 import tripleplay.ui.Background;
 import tripleplay.ui.Root;
 import tripleplay.ui.SimpleStyles;
@@ -187,13 +188,15 @@ public class BoardScreen extends Screen {
                         final Layer layer = sprites.createDoorLayer().setTint(blueDoorTint);
                         group.addAt(layer, .5f, .5f);
                         door.isOpen.connectNotify(new Slot<Boolean>() {
+                            Animation.Handle handle = null;
                             @Override public void onEmit(Boolean isOpen) {
                                 float closedY = .5f;
                                 float openY = 1.2f;
+                                if (handle != null) {handle.cancel(); handle = null;}
                                 if (isOpen) {
-                                    iface.anim.tweenY(layer).to(openY).easeInOut();
+                                    handle = iface.anim.tweenY(layer).to(openY).easeInOut().handle();
                                 } else {
-                                    iface.anim.tweenY(layer).to(closedY).easeInOut();
+                                    handle = iface.anim.tweenY(layer).to(closedY).easeInOut().handle();
                                 }
                             }
                         });
