@@ -1,5 +1,6 @@
 package de.cdietze.quads.core;
 
+import de.cdietze.playn_util.Screen;
 import playn.core.Canvas;
 import playn.core.Image;
 import playn.core.Path;
@@ -8,11 +9,10 @@ import playn.scene.ImageLayer;
 import playn.scene.Layer;
 import tripleplay.util.Colors;
 
-import java.util.Objects;
-
 public class Sprites {
     private static final int IMAGE_SIZE = 100;
     private static final float DEFAULT_STROKE_WIDTH = .05f * IMAGE_SIZE;
+    private final Screen screen;
 
     public interface Cols {
         int PLAYER_BODY = 0xff00B30C;
@@ -21,8 +21,9 @@ public class Sprites {
     public final Platform plat;
     private final Images images;
 
-    public Sprites(Platform plat) {
-        this.plat = Objects.requireNonNull(plat);
+    public Sprites(Screen screen) {
+        this.screen = screen;
+        this.plat = screen.plat;
         images = new Images();
     }
 
@@ -54,6 +55,7 @@ public class Sprites {
     public ImageLayer createExpandoLayer() {
         ImageLayer imageLayer = new ImageLayer(images.expando);
         imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
+        screen.iface.anim.repeat(imageLayer).tweenAlpha(imageLayer).to(.5f).in(1000f).then().tweenAlpha(imageLayer).to(1f).in(1000f);
         return imageLayer;
     }
     public ImageLayer createGoalLayer() {
@@ -148,7 +150,7 @@ public class Sprites {
         drawSingleButton(canvas, size);
         return canvas.image;
     }
-    
+
     private Canvas drawSingleButton(Canvas canvas, float size) {
         float width = .9f * size;
         float height = .4f * size;
