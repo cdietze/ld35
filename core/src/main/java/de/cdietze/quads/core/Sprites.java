@@ -179,6 +179,7 @@ public class Sprites {
 
         float lineMargin = .4f * size;
         canvas.setStrokeWidth(.1f * size);
+        canvas.setLineCap(Canvas.LineCap.SQUARE);
         canvas.setStrokeColor(Colors.brighter(Cols.PLAYER_BODY));
         canvas.drawLine(lineMargin, .5f * size, size - lineMargin, .5f * size);
         canvas.drawLine(.5f * size, lineMargin, .5f * size, size - lineMargin);
@@ -193,7 +194,7 @@ public class Sprites {
         float y = .5f * (size - height) + .2f * size;
         Canvas canvas = plat.graphics().createCanvas(size, size);
         canvas.setFillColor(Colors.BLACK);
-        canvas.fillRoundRect(x, y, width, height, .4f * size);
+        canvas.fillRoundRect(x, y, width, height, .25f * size);
         return canvas.image;
     }
 
