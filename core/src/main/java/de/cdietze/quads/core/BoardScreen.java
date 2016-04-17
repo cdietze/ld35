@@ -1,7 +1,6 @@
 package de.cdietze.quads.core;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import de.cdietze.playn_util.DialogKeeper;
 import de.cdietze.playn_util.ScaledElement;
 import de.cdietze.playn_util.Screen;
@@ -201,23 +200,68 @@ public class BoardScreen extends Screen {
         }
 
         private void initEntityLayers() {
-            final List<Layer> entityLayers = new ArrayList<>();
+            final List<Optional<Layer>> entityLayers = new ArrayList<>();
             state.entities.connectNotify(new RList.Listener<BoardState.Entity>() {
                 @Override
                 public void onAdd(final int index, final BoardState.Entity entity) {
-                    Layer entityLayer = entityLayerProvider.createLayer(entity);
+                    Optional<Layer> entityLayer = createEntityLayer(entity);
                     entityLayers.add(index, entityLayer);
-                    entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer));
-                    gridLayer.add(entityLayer);
-                    entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer));
+                    if (entityLayer.isPresent()) {
+                        entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer.get()));
+                        gridLayer.add(entityLayer.get());
+                        entity.fieldIndex.connectNotify(moveLayerWithFieldIndexSlot(entityLayer.get()));
+                    }
                 }
 
                 @Override
                 public void onRemove(int index, BoardState.Entity elem) {
-                    entityLayers.remove(index).close();
+                    Optional<Layer> removed = entityLayers.remove(index);
+                    if (removed.isPresent()) removed.get().close();
                 }
             });
         }
+
+        private Optional<Layer> createEntityLayer(BoardState.Entity entity) {
+            final int blueDoorTint = 0xff8D8DEB;
+            switch (entity.type) {
+                case WALL:
+                    return Optional.absent();
+                case PUSHER:
+                    return Optional.of(sprites.createPusherLayer().setDepth(Depths.pushers));
+                case EXPANDO:
+                    return Optional.of(sprites.createExpandoLayer().setDepth(Depths.expandos));
+                case BUTTON:
+                    return Optional.of(sprites.createButtonLayer().setTint(blueDoorTint).setDepth(Depths.buttons));
+                case DOOR: {
+                    BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
+                    // Put this layer in a container for clipping and animating
+                    GroupLayer group = new GroupLayer(1f, 1f);
+                    group.setOrigin(Layer.Origin.CENTER).setDepth(Depths.doors);
+                    final Layer layer1 = sprites.createDoorLayer().setTint(blueDoorTint);
+                    group.addAt(layer1, .5f, .5f);
+                    door.isOpen.connectNotify(new Slot<Boolean>() {
+                        Animation.Handle handle = null;
+                        @Override public void onEmit(Boolean isOpen) {
+                            float closedY = .5f;
+                            float openY = 1.2f;
+                            if (handle != null) {handle.cancel(); handle = null;}
+                            if (isOpen) {
+                                handle = iface.anim.tweenY(layer1).to(openY).easeInOut().handle();
+                            } else {
+                                handle = iface.anim.tweenY(layer1).to(closedY).easeInOut().handle();
+                            }
+                        }
+                    });
+                    return Optional.<Layer>of(group);
+                }
+                case GOAL: {
+                    return Optional.of(sprites.createGoalLayer().setDepth(Depths.goals));
+                }
+                default:
+                    throw new AssertionError("Unknown entity type: " + entity.type);
+            }
+        }
+
         private Slot<Integer> moveLayerWithFieldIndexSlot(final Layer layer) {
             return new Slot<Integer>() {
                 @Override public void onEmit(Integer fieldIndex) {
@@ -228,68 +272,23 @@ public class BoardScreen extends Screen {
             };
         }
 
-        private List<Layer> createFieldLayers() {
-            ImmutableList.Builder<Layer> builder = ImmutableList.builder();
+        private void createFieldLayers() {
             for (int fieldIndex = 0; fieldIndex < level.fieldCount; ++fieldIndex) {
+                if (state.level.walls.contains(fieldIndex)) {
+                    // Walls are gaps
+                    continue;
+                }
                 Layer fieldLayer = BoardScreen.createFieldLayer().setDepth(Depths.fields);
                 int x = toX(level.dim, fieldIndex);
                 int y = toY(level.dim, fieldIndex);
                 gridLayer.addAt(fieldLayer, x, y);
-                builder.add(fieldLayer);
             }
-            return builder.build();
         }
 
-        private EntityLayerProvider entityLayerProvider = new EntityLayerProvider() {
-            @Override public Layer createLayer(BoardState.Entity entity) {
-                final int blueDoorTint = 0xff8D8DEB;
-                switch (entity.type) {
-                    case WALL:
-                        return createFieldLayer().setTint(0xff222222).setDepth(Depths.walls);
-                    case PUSHER:
-                        return sprites.createPusherLayer().setDepth(Depths.pushers);
-                    case EXPANDO:
-                        return sprites.createExpandoLayer().setDepth(Depths.expandos);
-                    case BUTTON:
-                        return sprites.createButtonLayer().setTint(blueDoorTint).setDepth(Depths.buttons);
-                    case DOOR: {
-                        BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
-                        // Put this layer in a container for clipping and animating
-                        GroupLayer group = new GroupLayer(1f, 1f);
-                        group.setOrigin(Layer.Origin.CENTER).setDepth(Depths.doors);
-                        final Layer layer = sprites.createDoorLayer().setTint(blueDoorTint);
-                        group.addAt(layer, .5f, .5f);
-                        door.isOpen.connectNotify(new Slot<Boolean>() {
-                            Animation.Handle handle = null;
-                            @Override public void onEmit(Boolean isOpen) {
-                                float closedY = .5f;
-                                float openY = 1.2f;
-                                if (handle != null) {handle.cancel(); handle = null;}
-                                if (isOpen) {
-                                    handle = iface.anim.tweenY(layer).to(openY).easeInOut().handle();
-                                } else {
-                                    handle = iface.anim.tweenY(layer).to(closedY).easeInOut().handle();
-                                }
-                            }
-                        });
-                        return group;
-                    }
-                    case GOAL: {
-                        return sprites.createGoalLayer().setDepth(Depths.goals);
-                    }
-                    default:
-                        throw new AssertionError("Unknown entity type: " + entity.type);
-                }
-            }
-        };
     }
 
     private static Layer createFieldLayer() {
         Layer l = Layers.solid(0xff999999, 1f - 2 * fieldGapWidth, 1f - 2 * fieldGapWidth).setOrigin(Layer.Origin.CENTER);
         return l;
-    }
-
-    interface EntityLayerProvider {
-        Layer createLayer(BoardState.Entity entity);
     }
 }
