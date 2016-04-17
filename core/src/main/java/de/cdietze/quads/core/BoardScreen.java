@@ -322,17 +322,17 @@ public class BoardScreen extends Screen {
                     // Walls are gaps
                     continue;
                 }
-                Layer fieldLayer = BoardScreen.createFieldLayer().setDepth(Depths.fields);
+                Layer fieldLayer = BoardScreen.createFieldLayer(fieldIndex).setDepth(Depths.fields);
                 int x = toX(level.dim, fieldIndex);
                 int y = toY(level.dim, fieldIndex);
                 gridLayer.addAt(fieldLayer, x, y);
             }
         }
-
     }
 
-    private static Layer createFieldLayer() {
-        Layer l = Layers.solid(0xff999999, 1f - 2 * fieldGapWidth, 1f - 2 * fieldGapWidth).setOrigin(Layer.Origin.CENTER);
+    private static Layer createFieldLayer(int fieldIndex) {
+        int color = fieldIndex % 2 == 0 ? 0xff999999 : 0xff5C7399;
+        Layer l = Layers.solid(color, 1f - 2 * fieldGapWidth, 1f - 2 * fieldGapWidth).setOrigin(Layer.Origin.CENTER);
         return l;
     }
 
