@@ -9,10 +9,8 @@ import playn.scene.Layer;
 import react.RList;
 import react.Slot;
 import tripleplay.anim.Animation;
-import tripleplay.ui.Background;
-import tripleplay.ui.Root;
-import tripleplay.ui.SimpleStyles;
-import tripleplay.ui.Style;
+import tripleplay.ui.*;
+import tripleplay.ui.layout.AxisLayout;
 import tripleplay.ui.layout.BorderLayout;
 import tripleplay.util.Layers;
 
@@ -62,17 +60,15 @@ public class BoardScreen extends Screen {
         private final GroupLayer gridLayer = new GroupLayer();
         private final Level level = state.level;
 
-        private final List<Layer> fieldLayers;
-
         public Board() {
             rootLayer.setSize(level.dim.width(), level.dim.height()).setOrigin(Layer.Origin.CENTER);
             rootLayer.addAt(gridLayer, .5f, .5f);
             Layer backgroundLayer = Layers.solid(0xAA000000, rootLayer.width(), rootLayer.height());
             rootLayer.add(backgroundLayer.setDepth(-1f));
-            fieldLayers = createFieldLayers();
+            createFieldLayers();
             createPlayerLayer(state.playerEntity);
             initEntityLayers();
-            initGoalLayer();
+            initWinListener();
             initInput();
         }
 
@@ -129,12 +125,27 @@ public class BoardScreen extends Screen {
             }));
         }
 
-        private void initGoalLayer() {
-            int fieldIndex = level.playerGoal;
-            int x = toX(level.dim, fieldIndex);
-            int y = toY(level.dim, fieldIndex);
-            Layer layer = sprites.createGoalLayer().setDepth(Depths.goals);
-            gridLayer.addAt(layer, x, y);
+        private void initWinListener() {
+            state.playerWon.connectNotify(new Slot<Boolean>() {
+                @Override public void onEmit(Boolean won) {
+                    if (!won) return;
+                    createDialog(createWinPanel()).useShade().slideTopDown().display();
+                }
+            });
+        }
+
+        private Group createWinPanel() {
+            /** Use the colors from {@link SimpleStyles} */
+            int bgColor = 0xFFCCCCCC, ulColor = 0xFFEEEEEE, brColor = 0xFFAAAAAA;
+            Group group = new Group(AxisLayout.vertical()).setStyles(Style.BACKGROUND.is(Background.roundRect(plat.graphics(), bgColor, 5, ulColor, 2).inset(20f)));
+            group.add(new Label("You won!"));
+            group.add(new Button("Next Level").onClick(new Slot<Button>() {
+                @Override
+                public void onEmit(Button event) {
+                    // TODO
+                }
+            }));
+            return group;
         }
 
         private void initEntityLayers() {
@@ -210,6 +221,9 @@ public class BoardScreen extends Screen {
                             }
                         });
                         return group;
+                    }
+                    case GOAL: {
+                        return sprites.createGoalLayer().setDepth(Depths.player);
                     }
                     default:
                         throw new AssertionError("Unknown entity type: " + entity.type);
