@@ -48,7 +48,7 @@ public final class Levels {
                     ".W.WWWW\n" +
                     "...PPP.\n" +
                     ".WW....\n" +
-                    ".W....G").build();
+                    ".WW...G").build();
 
     public static final Level yummy = new Level.Builder()
             .title("Yummy!")
