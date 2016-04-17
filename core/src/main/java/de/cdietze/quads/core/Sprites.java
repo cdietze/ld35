@@ -26,11 +26,6 @@ public class Sprites {
         images = new Images();
     }
 
-    public ImageLayer createEntityLayer() {
-        ImageLayer imageLayer = new ImageLayer(images.circle);
-        imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
-        return imageLayer;
-    }
     public ImageLayer createHeadLayer() {
         ImageLayer imageLayer = new ImageLayer(images.head);
         imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
@@ -144,29 +139,37 @@ public class Sprites {
     private Image drawButtonImage() {
         float size = IMAGE_SIZE;
         Canvas canvas = plat.graphics().createCanvas(size, size);
+        canvas.setStrokeWidth(DEFAULT_STROKE_WIDTH);
         canvas.save().translate(0, .3f * size).setFillColor(Colors.BLACK);
+        canvas.setStrokeColor(Colors.BLACK);
         drawSingleButton(canvas, size);
         canvas.restore().save().translate(0f, .2f * size).setFillColor(Colors.WHITE);
+        canvas.setStrokeColor(Colors.darker(Colors.WHITE));
         drawSingleButton(canvas, size);
         return canvas.image;
     }
+    
     private Canvas drawSingleButton(Canvas canvas, float size) {
-        float width = .8f * size;
+        float width = .9f * size;
         float height = .4f * size;
         float x = .5f * (size - width);
         float y = .5f * (size - height);
-        return canvas.fillRoundRect(x, y, width, height, .1f * size);
+        canvas.fillRoundRect(x, y, width, height, .1f * size);
+        return canvas.strokeRoundRect(x, y, width, height, .1f * size);
     }
 
     private Image drawDoorImage() {
         float size = IMAGE_SIZE;
-        float width = .8f * size;
+        float width = .9f * size;
         float height = .8f * size;
         float x = .5f * (size - width);
         float y = .5f * (size - height);
         Canvas canvas = plat.graphics().createCanvas(size, size);
         canvas.setFillColor(Colors.WHITE);
+        canvas.setStrokeWidth(DEFAULT_STROKE_WIDTH);
+        canvas.setStrokeColor(Colors.darker(Colors.WHITE));
         canvas.fillRoundRect(x, y, width, size, .2f * size);
+        canvas.strokeRoundRect(x, y, width, size, .2f * size);
         return canvas.image;
     }
 
@@ -188,10 +191,10 @@ public class Sprites {
 
     private Image drawGoalImage() {
         float size = IMAGE_SIZE;
-        float width = .8f * size;
+        float width = .9f * size;
         float height = .4f * size;
         float x = .5f * (size - width);
-        float y = .5f * (size - height) + .2f * size;
+        float y = .5f * (size - height) + .25f * size;
         Canvas canvas = plat.graphics().createCanvas(size, size);
         canvas.setFillColor(Colors.BLACK);
         canvas.fillRoundRect(x, y, width, height, .25f * size);
