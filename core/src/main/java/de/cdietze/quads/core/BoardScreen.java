@@ -282,7 +282,7 @@ public class BoardScreen extends Screen {
                         return group;
                     }
                     case GOAL: {
-                        return sprites.createGoalLayer().setDepth(Depths.player);
+                        return sprites.createGoalLayer().setDepth(Depths.goals);
                     }
                     default:
                         throw new AssertionError("Unknown entity type: " + entity.type);
