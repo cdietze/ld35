@@ -81,7 +81,7 @@ public class BoardScreen extends Screen {
             rootLayer.setSize(level.dim.width(), level.dim.height()).setOrigin(Layer.Origin.CENTER);
             rootLayer.addAt(gridLayer, .5f, .5f);
             float margin = fieldGapWidth;
-            Layer backgroundLayer = Layers.solid(0xaa666666, rootLayer.width() + margin, rootLayer.height() + margin).setOrigin(Layer.Origin.CENTER).setDepth(-1f);
+            Layer backgroundLayer = Layers.solid(0xaacccccc, rootLayer.width() + margin, rootLayer.height() + margin).setOrigin(Layer.Origin.CENTER).setDepth(-1f);
             rootLayer.addAt(backgroundLayer, rootLayer.width() * .5f, rootLayer.height() * .5f);
             createFieldLayers();
             createPlayerLayer(state.playerEntity);
@@ -246,7 +246,7 @@ public class BoardScreen extends Screen {
         }
 
         private Optional<Layer> createEntityLayer(BoardState.Entity entity) {
-            final int blueDoorTint = 0xff8D8DEB;
+            final int blueDoorTint = 0xffD47F6F;
             switch (entity.type) {
                 case WALL:
                     return Optional.absent();
@@ -331,7 +331,7 @@ public class BoardScreen extends Screen {
     }
 
     private static Layer createFieldLayer(int fieldIndex) {
-        int color = fieldIndex % 2 == 0 ? 0xff999999 : 0xff5C7399;
+        int color = fieldIndex % 2 == 0 ? 0xffB6B6B6 : 0xff6A85B1;
         Layer l = Layers.solid(color, 1f - 2 * fieldGapWidth, 1f - 2 * fieldGapWidth).setOrigin(Layer.Origin.CENTER);
         return l;
     }
