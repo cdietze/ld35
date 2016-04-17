@@ -23,6 +23,8 @@ import static de.cdietze.quads.core.PointUtils.toY;
 
 public class BoardScreen extends Screen {
 
+    private static final float fieldGapWidth = 0.03f;
+
     private interface Depths {
         float fields = -1f;
         float player = 10f;
@@ -66,8 +68,9 @@ public class BoardScreen extends Screen {
         public Board() {
             rootLayer.setSize(level.dim.width(), level.dim.height()).setOrigin(Layer.Origin.CENTER);
             rootLayer.addAt(gridLayer, .5f, .5f);
-            Layer backgroundLayer = Layers.solid(0xAA000000, rootLayer.width(), rootLayer.height());
-            rootLayer.add(backgroundLayer.setDepth(-1f));
+            float margin = fieldGapWidth;
+            Layer backgroundLayer = Layers.solid(0xaa666666, rootLayer.width() + margin, rootLayer.height() + margin).setOrigin(Layer.Origin.CENTER).setDepth(-1f);
+            rootLayer.addAt(backgroundLayer, rootLayer.width() * .5f, rootLayer.height() * .5f);
             createFieldLayers();
             createPlayerLayer(state.playerEntity);
             initEntityLayers();
@@ -247,7 +250,7 @@ public class BoardScreen extends Screen {
     }
 
     private static Layer createFieldLayer() {
-        Layer l = Layers.solid(0xff555555, .9f, .9f).setOrigin(Layer.Origin.CENTER);
+        Layer l = Layers.solid(0xff999999, 1f - 2 * fieldGapWidth, 1f - 2 * fieldGapWidth).setOrigin(Layer.Origin.CENTER);
         return l;
     }
 
