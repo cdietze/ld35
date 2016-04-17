@@ -6,6 +6,7 @@ import de.cdietze.playn_util.Screen;
 import playn.core.Keyboard;
 import playn.scene.GroupLayer;
 import playn.scene.Layer;
+import react.Connection;
 import react.RList;
 import react.Slot;
 import tripleplay.anim.Animation;
@@ -33,13 +34,15 @@ public class BoardScreen extends Screen {
         float goals = 0f;
     }
 
-    private final BoardState state;
+    public final MainGame game;
     private final Sprites sprites;
+    private final BoardState state;
 
-    public BoardScreen(MainGame game, BoardState state) {
+    public BoardScreen(MainGame game, Level level) {
         super(game);
-        this.state = state;
+        this.game = game;
         this.sprites = new Sprites(plat);
+        this.state = new BoardState(level);
     }
 
     @Override
@@ -103,7 +106,7 @@ public class BoardScreen extends Screen {
         }
 
         private void initInput() {
-            closeOnHide(plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
+            final Connection conn = plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
 
                 @Override public void onEmit(Keyboard.KeyEvent event) {
                     if (!event.down) return;
@@ -122,7 +125,13 @@ public class BoardScreen extends Screen {
                             break;
                     }
                 }
-            }));
+            });
+            closeOnHide(conn);
+            state.playerWon.connectNotify(new Slot<Boolean>() {
+                @Override public void onEmit(Boolean won) {
+                    if (won) conn.close();
+                }
+            });
         }
 
         private void initWinListener() {
@@ -139,10 +148,10 @@ public class BoardScreen extends Screen {
             int bgColor = 0xFFCCCCCC, ulColor = 0xFFEEEEEE, brColor = 0xFFAAAAAA;
             Group group = new Group(AxisLayout.vertical()).setStyles(Style.BACKGROUND.is(Background.roundRect(plat.graphics(), bgColor, 5, ulColor, 2).inset(20f)));
             group.add(new Label("You won!"));
-            group.add(new Button("Next Level").onClick(new Slot<Button>() {
+            group.add(new Button("Play again").onClick(new Slot<Button>() {
                 @Override
                 public void onEmit(Button event) {
-                    // TODO
+                    game.screens.replace(new BoardScreen(game, level));
                 }
             }));
             return group;

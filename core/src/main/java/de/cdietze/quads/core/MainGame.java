@@ -40,7 +40,7 @@ public class MainGame extends SceneGame {
         new Pointer(plat, rootLayer, true);
 
         Level level = Levels.level1;
-        BoardState boardState = new BoardState(level);
-        screens.push(new BoardScreen(this, boardState));
+
+        screens.push(new BoardScreen(this, level));
     }
 }
