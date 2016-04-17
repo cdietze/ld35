@@ -169,6 +169,7 @@ public class BoardScreen extends Screen {
 
         private EntityLayerProvider entityLayerProvider = new EntityLayerProvider() {
             @Override public Layer createLayer(BoardState.Entity entity) {
+                final int blueDoorTint = 0xff8D8DEB;
                 switch (entity.type) {
                     case WALL:
                         return createFieldLayer().setTint(0xff222222);
@@ -177,16 +178,26 @@ public class BoardScreen extends Screen {
                     case EXPANDO:
                         return sprites.createEntityLayer().setTint(0xffff0000);
                     case BUTTON:
-                        return sprites.createButtonLayer().setTint(0xff8D8DEB);
+                        return sprites.createButtonLayer().setTint(blueDoorTint);
                     case DOOR: {
                         BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
-                        final Layer layer = sprites.createEntityLayer();
+                        // Put this layer in a container for clipping and animating
+                        GroupLayer group = new GroupLayer(1f, 1f);
+                        group.setOrigin(Layer.Origin.CENTER);
+                        final Layer layer = sprites.createDoorLayer().setTint(blueDoorTint);
+                        group.addAt(layer, .5f, .5f);
                         door.isOpen.connectNotify(new Slot<Boolean>() {
                             @Override public void onEmit(Boolean isOpen) {
-                                layer.setTint(isOpen ? 0xff0000ff : 0xff000099);
+                                float closedY = .5f;
+                                float openY = 1.2f;
+                                if (isOpen) {
+                                    iface.anim.tweenY(layer).to(openY).easeInOut();
+                                } else {
+                                    iface.anim.tweenY(layer).to(closedY).easeInOut();
+                                }
                             }
                         });
-                        return layer;
+                        return group;
                     }
                     default:
                         throw new AssertionError("Unknown entity type: " + entity.type);
