@@ -105,12 +105,15 @@ public class Sprites {
 
     private Image drawPusherImage() {
         float size = IMAGE_SIZE;
-        float radius = .35f * size;
-        int fillColor = 0xffB3A9A1;
-        int borderColor = Colors.brighter(fillColor);
+        float width = .7f * size;
+        float height = .7f * size;
+        float x = .5f * (size - width);
+        float y = .5f * (size - height);
+        int fillColor = 0xff5F5F66;
+        int borderColor = Colors.darker(fillColor);
         Canvas canvas = plat.graphics().createCanvas(size, size);
-        canvas.setFillColor(fillColor).fillCircle(.5f * size, .5f * size, radius);
-        canvas.setStrokeColor(borderColor).setStrokeWidth(DEFAULT_STROKE_WIDTH).strokeCircle(.5f * size, .5f * size, radius);
+        canvas.setFillColor(fillColor).fillRoundRect(x, y, width, height, 10f);
+        canvas.setStrokeColor(borderColor).setStrokeWidth(DEFAULT_STROKE_WIDTH).strokeRoundRect(x, y, width, height, 10f);
         return canvas.image;
     }
 
