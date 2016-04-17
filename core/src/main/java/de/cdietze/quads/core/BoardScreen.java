@@ -122,9 +122,7 @@ public class BoardScreen extends Screen {
             int fieldIndex = level.playerGoal;
             int x = toX(level.dim, fieldIndex);
             int y = toY(level.dim, fieldIndex);
-            ImageLayer layer = sprites.createEntityLayer();
-            layer.setTint(0xff00ff00);
-
+            ImageLayer layer = sprites.createGoalLayer();
             gridLayer.addAt(layer, x, y);
         }
 
