@@ -5,10 +5,10 @@ public final class Levels {
 
     public static final Level level1 = Level.read("" +
             "XX...a.\n" +
-            "....P..\n" +
-            ".....WA\n" +
-            ".P.S.W.\n" +
-            ".....WW\n" +
             ".......\n" +
-            "...G...");
+            ".....WA\n" +
+            "aP.S.W.\n" +
+            ".....P.\n" +
+            ".....WW\n" +
+            ".....AG");
 }
