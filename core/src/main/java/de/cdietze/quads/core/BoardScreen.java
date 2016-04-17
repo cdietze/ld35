@@ -336,7 +336,7 @@ public class BoardScreen extends Screen {
     }
 
     private static Layer createFieldLayer(int fieldIndex) {
-        int color = fieldIndex % 2 == 0 ? 0xffB6B6B6 : 0xff6A85B1;
+        int color = fieldIndex % 2 == 0 ? 0xffB6B6B6 : 0xff8D9AB0;
         Layer l = Layers.solid(color, 1f - 2 * fieldGapWidth, 1f - 2 * fieldGapWidth).setOrigin(Layer.Origin.CENTER);
         return l;
     }
