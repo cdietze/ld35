@@ -47,6 +47,11 @@ public class Sprites {
         imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
+    public ImageLayer createDoorLayer() {
+        ImageLayer imageLayer = new ImageLayer(images.door);
+        imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
+        return imageLayer;
+    }
 
     private Image drawCircleImage() {
         float size = 100;
@@ -141,11 +146,24 @@ public class Sprites {
         return canvas.fillRoundRect(x, y, width, height, .1f * size);
     }
 
+    private Image drawDoorImage() {
+        float size = IMAGE_SIZE;
+        float width = .8f * size;
+        float height = .8f * size;
+        float x = .5f * (size - width);
+        float y = .5f * (size - height);
+        Canvas canvas = plat.graphics().createCanvas(size, size);
+        canvas.setFillColor(Colors.WHITE);
+        canvas.fillRoundRect(x, y, width, size, .2f * size);
+        return canvas.image;
+    }
+
     private final class Images {
         private Image circle = drawCircleImage();
         private Image head = drawHeadImage();
         private Image tail = drawTailImage();
         private Image pusher = drawPusherImage();
         private Image button = drawButtonImage();
+        private Image door = drawDoorImage();
     }
 }
