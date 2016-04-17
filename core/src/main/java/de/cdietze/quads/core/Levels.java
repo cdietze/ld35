@@ -17,7 +17,7 @@ public final class Levels {
     public static final Level introButtonAndPusher = new Level.Builder()
             .title("A door, a button and a rock that looks like a circle?")
             .read("" +
-                    ".P..aWW\n" +
+                    ".P.a.WW\n" +
                     "S...A.G\n" +
                     ".....WW").build();
 
