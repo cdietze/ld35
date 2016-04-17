@@ -12,6 +12,7 @@ import java.util.Objects;
 
 public class Sprites {
     private static final int IMAGE_SIZE = 100;
+    private static final float DEFAULT_STROKE_WIDTH = .05f * IMAGE_SIZE;
 
     public final Platform plat;
     private final Images images;
@@ -26,7 +27,6 @@ public class Sprites {
         imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
-
     public ImageLayer createHeadLayer() {
         ImageLayer imageLayer = new ImageLayer(images.head);
         imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
@@ -34,6 +34,11 @@ public class Sprites {
     }
     public ImageLayer createTailLayer() {
         ImageLayer imageLayer = new ImageLayer(images.tail);
+        imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
+        return imageLayer;
+    }
+    public ImageLayer createPusherLayer() {
+        ImageLayer imageLayer = new ImageLayer(images.pusher);
         imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
@@ -87,7 +92,7 @@ public class Sprites {
             // Draw Mouth
             float x = .2f * size; float y = .68f * size;
             float xOff = .1f * size; float yOff = .08f * size;
-            canvas.setStrokeColor(Colors.BLACK).setStrokeWidth(.05f * size);
+            canvas.setStrokeColor(Colors.BLACK).setStrokeWidth(DEFAULT_STROKE_WIDTH);
             canvas.strokePath(canvas.createPath().moveTo(x, y).bezierTo(x + xOff, y + yOff, size - x - xOff, y + yOff, size - x, y));
         }
         return canvas.image;
@@ -103,9 +108,21 @@ public class Sprites {
         return canvas.image;
     }
 
+    private Image drawPusherImage() {
+        float size = IMAGE_SIZE;
+        float radius = .4f * size;
+        int fillColor = 0xffB3A9A1;
+        int borderColor = 0xffEBE1D9;
+        Canvas canvas = plat.graphics().createCanvas(size, size);
+        canvas.setFillColor(fillColor).fillCircle(.5f * size, .5f * size, radius);
+        canvas.setStrokeColor(borderColor).setStrokeWidth(DEFAULT_STROKE_WIDTH).strokeCircle(.5f * size, .5f * size, radius);
+        return canvas.image;
+    }
+
     private final class Images {
         private Image circle = drawCircleImage();
         private Image head = drawHeadImage();
         private Image tail = drawTailImage();
+        private Image pusher = drawPusherImage();
     }
 }

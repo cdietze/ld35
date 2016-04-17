@@ -173,7 +173,7 @@ public class BoardScreen extends Screen {
                     case WALL:
                         return createFieldLayer().setTint(0xff222222);
                     case PUSHER:
-                        return sprites.createEntityLayer();
+                        return sprites.createPusherLayer();
                     case EXPANDO:
                         return sprites.createEntityLayer().setTint(0xffff0000);
                     case BUTTON:
