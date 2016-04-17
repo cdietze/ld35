@@ -34,7 +34,10 @@ public class BoardState {
             fieldIndex = new IntValue(initialFieldIndex);
         }
 
-        public boolean canEnter(Entity entity, Direction dir) { return false; }
+        /**
+         * power is the size of the player. Pushing a pusher requires one power each
+         */
+        public boolean canEnter(Entity entity, Direction dir, int power) { return false; }
         public boolean keepPlayerTailOnEnter() { return false; }
         public void beforeEntityEnters(Entity entity, Direction dir) {
             log.debug("beforeEntityEnters", "this", this, "entity", entity);
@@ -65,19 +68,20 @@ public class BoardState {
 
     public class WallEntity extends Entity {
         public WallEntity(int fieldIndex) { super(Type.WALL, fieldIndex); }
-        @Override public boolean canEnter(Entity e, Direction dir) { return false; }
+        @Override public boolean canEnter(Entity e, Direction dir, int power) { return false; }
     }
 
     private class PusherEntity extends Entity {
         public PusherEntity(int initialFieldIndex) {
             super(Type.PUSHER, initialFieldIndex);
         }
-        @Override public boolean canEnter(Entity e, Direction dir) {
+        @Override public boolean canEnter(Entity e, Direction dir, int power) {
+            if (power <= 0) return false;
             Point targetPos = toPoint(level.dim, fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
             if (!canMoveHere(targetPos)) return false;
             List<Entity> targetEntities = entitiesAt(toIndex(level.dim, targetPos));
             for (Entity targetEntity : targetEntities) {
-                if (!targetEntity.canEnter(this, dir)) return false;
+                if (!targetEntity.canEnter(this, dir, power - 1)) return false;
             }
             return true;
         }
@@ -101,7 +105,7 @@ public class BoardState {
         public ExpandoEntity(int initialFieldIndex) {
             super(Type.EXPANDO, initialFieldIndex);
         }
-        @Override public boolean canEnter(Entity e, Direction dir) { return e.type == Type.PLAYER; }
+        @Override public boolean canEnter(Entity e, Direction dir, int power) { return e.type == Type.PLAYER; }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
             super.beforeEntityEnters(e, dir);
             checkState(e.type == Type.PLAYER);
@@ -126,7 +130,7 @@ public class BoardState {
             }));
             Values.or(allButtonsDown, isOccupied).connectNotify(isOpen.slot());
         }
-        @Override public boolean canEnter(Entity e, Direction dir) { return isOpen.get(); }
+        @Override public boolean canEnter(Entity e, Direction dir, int power) { return isOpen.get(); }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
             super.beforeEntityEnters(e, dir);
             isOccupied.update(true);
@@ -146,7 +150,7 @@ public class BoardState {
             super(Type.BUTTON, initialFieldIndex);
             this.doorLinkIndex = doorLinkIndex;
         }
-        @Override public boolean canEnter(Entity e, Direction dir) { return true; }
+        @Override public boolean canEnter(Entity e, Direction dir, int power) { return true; }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
             super.beforeEntityEnters(e, dir);
             isDown.update(true);
@@ -162,7 +166,7 @@ public class BoardState {
         public GoalEntity(int initialFieldIndex) {
             super(Type.GOAL, initialFieldIndex);
         }
-        @Override public boolean canEnter(Entity e, Direction dir) { return true; }
+        @Override public boolean canEnter(Entity e, Direction dir, int power) { return true; }
         @Override public void beforeEntityEnters(Entity e, Direction dir) {
             super.beforeEntityEnters(e, dir);
             if (e.type == Type.PLAYER) {
@@ -221,7 +225,7 @@ public class BoardState {
         if (!canMoveHere(pos)) return false;
         List<Entity> targets = entitiesAt(toIndex(level.dim, pos));
         for (Entity target : targets) {
-            if (!target.canEnter(playerEntity, dir)) return false;
+            if (!target.canEnter(playerEntity, dir, playerEntity.tail.size() + 1)) return false;
         }
         return true;
     }
