@@ -47,7 +47,7 @@ public final class Levels {
                     "aa..WWG\n" +
                     "aa..A..").build();
 
-    public static final List<Level> levels = ImmutableList.of(level1, level2);
+    public static final List<Level> levels = ImmutableList.of(level1, level2, level3);
 
     public static String fullTitle(Level level) {
         int levelIndex = levels.indexOf(level);
