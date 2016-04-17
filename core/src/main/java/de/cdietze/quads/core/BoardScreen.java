@@ -80,6 +80,20 @@ public class BoardScreen extends Screen {
             initEntityLayers();
             initWinListener();
             initInput();
+            initTitleDialog();
+        }
+
+        private void initTitleDialog() {
+            final int levelIndex = Levels.levels.indexOf(level);
+            StringBuilder title = new StringBuilder();
+            if (levelIndex >= 0) {
+                title.append("Level " + (levelIndex + 1) + " - ");
+            }
+            title.append(level.title);
+            Group group = createDialogGroup();
+            group.add(new Label(title.toString()));
+            DialogKeeper.Dialog display = createDialog(group).slideTopDown().display();
+            iface.anim.delay(3000).then().action(display.dismissSlot());
         }
 
         private Layer createPlayerLayer(BoardState.PlayerEntity player) {
@@ -150,18 +164,25 @@ public class BoardScreen extends Screen {
 
         private Group createWinPanel() {
             Group group = createDialogGroup();
-            group.add(new Label("You won!"));
-            group.add(new Button("Play again").onClick(new Slot<Button>() {
-                @Override
-                public void onEmit(Button event) {
-                    game.screens.replace(new BoardScreen(game, level));
+            group.add(new Label("You solved it!"));
+            final int levelIndex = Levels.levels.indexOf(level);
+            if (levelIndex >= 0) {
+                if (levelIndex + 1 < Levels.levels.size()) {
+                    group.add(new Button("Next").onClick(new Slot<Button>() {
+                        @Override
+                        public void onEmit(Button event) {
+                            game.screens.replace(new BoardScreen(game, Levels.levels.get(levelIndex + 1)));
+                        }
+                    }));
+                } else {
+                    group.add(new Label("You finished all levels. Congratulations!"));
+                    group.add(new Button("Main Menu").onClick(new Slot<Button>() {
+                        @Override public void onEmit(Button event) {
+                            game.screens.remove(BoardScreen.this);
+                        }
+                    }));
                 }
-            }));
-            group.add(new Button("Main Menu").onClick(new Slot<Button>() {
-                @Override public void onEmit(Button event) {
-                    game.screens.remove(BoardScreen.this);
-                }
-            }));
+            }
             return group;
         }
 
