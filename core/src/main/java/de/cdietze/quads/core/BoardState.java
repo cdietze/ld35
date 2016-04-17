@@ -80,7 +80,7 @@ public class BoardState {
             if (!level.rect.contains(targetPos)) return false;
             int targetFieldIndex = toIndex(level.dim, targetPos);
             // We may not step on the players tail
-            if(playerEntity.tail.contains(targetFieldIndex)) return false;
+            if (playerEntity.tail.contains(targetFieldIndex)) return false;
             List<Entity> targetEntities = entitiesAt(toIndex(level.dim, targetPos));
             for (Entity targetEntity : targetEntities) {
                 if (!targetEntity.canEnter(this, dir, power - 1)) return false;
@@ -187,6 +187,7 @@ public class BoardState {
     public final PlayerEntity playerEntity;
     public final Value<Boolean> playerWon = new Value<>(false);
     public final Signal<ExpandoEntity> expandoConsumed = new Signal<>();
+    public final Signal<PusherEntity> playerPushes = new Signal<>();
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
@@ -244,6 +245,9 @@ public class BoardState {
         List<Entity> targetEntities = entitiesAt(targetHeadIndex);
         for (Entity targetEntity : targetEntities) {
             targetEntity.beforeEntityEnters(playerEntity, dir);
+            if (targetEntity.type == Entity.Type.PUSHER) {
+                playerPushes.emit((PusherEntity) targetEntity);
+            }
         }
         playerEntity.tail.remove(Integer.valueOf(targetHeadIndex));
         playerEntity.tail.add(0, playerEntity.fieldIndex.get());
