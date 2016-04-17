@@ -8,6 +8,7 @@ import de.cdietze.playn_util.Screen;
 import playn.core.Keyboard;
 import playn.scene.GroupLayer;
 import playn.scene.Layer;
+import pythagoras.f.Dimension;
 import react.Connection;
 import react.RList;
 import react.Slot;
@@ -54,8 +55,12 @@ public class BoardScreen extends Screen {
     public void wasAdded() {
         super.wasAdded();
         Root root = iface.createRoot(new BorderLayout(), SimpleStyles.newSheet(plat.graphics()), layer);
-        root.setSize(plat.graphics().viewSize);
-
+        // We define a maximum view size. Otherwise sprites become really blurry and its just too big
+        Dimension maxSize = new Dimension(1200, 800);
+        float width = Math.min(maxSize.width, plat.graphics().viewSize.width());
+        float height = Math.min(maxSize.height, plat.graphics().viewSize.height());
+        root.setSize(width, height);
+        root.setLocation((plat.graphics().viewSize.width() - width) * .5f, (plat.graphics().viewSize.height() - height) * .5f);
         Board board = new Board();
         ScaledElement boardElement = new ScaledElement(board.rootLayer);
         boardElement.addStyles(Style.BACKGROUND.is(Background.blank().inset(10f)));
