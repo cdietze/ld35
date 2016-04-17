@@ -12,6 +12,7 @@ import pythagoras.f.Dimension;
 import react.Connection;
 import react.RList;
 import react.Slot;
+import react.UnitSignal;
 import tripleplay.anim.Animation;
 import tripleplay.ui.*;
 import tripleplay.ui.layout.AxisLayout;
@@ -27,6 +28,8 @@ import static de.cdietze.quads.core.PointUtils.toY;
 public class BoardScreen extends Screen {
 
     private static final float fieldGapWidth = 0.03f;
+    private static final Dimension maxSize = new Dimension(1200, 800);
+    private static final float maxDialogWidth = 400f;
 
     private interface Depths {
         float fields = -1f;
@@ -57,7 +60,7 @@ public class BoardScreen extends Screen {
         super.wasAdded();
         Root root = iface.createRoot(new BorderLayout(), UiUtils.newSheet(plat.graphics()), layer);
         // We define a maximum view size. Otherwise sprites become really blurry and its just too big
-        Dimension maxSize = new Dimension(1200, 800);
+
         float width = Math.min(maxSize.width, plat.graphics().viewSize.width());
         float height = Math.min(maxSize.height, plat.graphics().viewSize.height());
         root.setSize(width, height);
@@ -98,9 +101,10 @@ public class BoardScreen extends Screen {
 
         private void initTitleDialog() {
             Group group = UiUtils.createDialogGroup(plat);
-            group.add(new Label(Levels.fullTitle(level)));
-            DialogKeeper.Dialog display = createDialog(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics())).add(group).slideTopDown().display();
-            iface.anim.delay(3000).then().action(display.dismissSlot());
+            group.add(new Label(Levels.fullTitle(level)).addStyles(Style.TEXT_WRAP.on));
+            DialogKeeper.Dialog dialog = createDialog(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics())).add(group).slideTopDown().display(maxDialogWidth);
+            iface.anim.delay(4000).then().action(dialog.dismissSlot());
+            userInput.connect(dialog.dismissSlot());
         }
 
         private Layer createPlayerLayer(BoardState.PlayerEntity player) {
@@ -133,6 +137,8 @@ public class BoardScreen extends Screen {
             return group;
         }
 
+        private UnitSignal userInput = new UnitSignal();
+
         private void initInput() {
             final Connection conn = plat.input().keyboardEvents.connect(new Keyboard.KeySlot() {
 
@@ -158,7 +164,9 @@ public class BoardScreen extends Screen {
                         case ESCAPE:
                             toggleEscapeDialog();
                             break;
+                        default: return;
                     }
+                    userInput.emit();
                 }
             });
             closeOnHide(conn);
@@ -182,8 +190,8 @@ public class BoardScreen extends Screen {
                         return;
                     }
                     Group group = UiUtils.createDialogGroup(plat);
-                    group.add(new Label("You solved it!"));
-                    group.add(new Label("You finished all levels. Congratulations!"));
+                    group.add(new Label("This is it."));
+                    group.add(new Label("Thanks for playing!"));
                     group.add(new Button("Main Menu").onClick(new Slot<Button>() {
                         @Override public void onEmit(Button event) {
                             game.screens.remove(BoardScreen.this);
