@@ -61,6 +61,11 @@ public class Sprites {
         imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
+    public ImageLayer createGoalLayer() {
+        ImageLayer imageLayer = new ImageLayer(images.goal);
+        imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
+        return imageLayer;
+    }
 
     private Image drawCircleImage() {
         float size = 100;
@@ -180,6 +185,18 @@ public class Sprites {
         return canvas.image;
     }
 
+    private Image drawGoalImage() {
+        float size = IMAGE_SIZE;
+        float width = .8f * size;
+        float height = .4f * size;
+        float x = .5f * (size - width);
+        float y = .5f * (size - height) + .2f * size;
+        Canvas canvas = plat.graphics().createCanvas(size, size);
+        canvas.setFillColor(Colors.BLACK);
+        canvas.fillRoundRect(x, y, width, height, .4f * size);
+        return canvas.image;
+    }
+
     private final class Images {
         private Image circle = drawCircleImage();
         private Image head = drawHeadImage();
@@ -188,5 +205,6 @@ public class Sprites {
         private Image button = drawButtonImage();
         private Image door = drawDoorImage();
         private Image expando = drawExpandoImage();
+        private Image goal = drawGoalImage();
     }
 }
