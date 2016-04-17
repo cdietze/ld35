@@ -230,26 +230,38 @@ public class BoardScreen extends Screen {
                     return Optional.of(sprites.createPusherLayer().setDepth(Depths.pushers));
                 case EXPANDO:
                     return Optional.of(sprites.createExpandoLayer().setDepth(Depths.expandos));
-                case BUTTON:
-                    return Optional.of(sprites.createButtonLayer().setTint(blueDoorTint).setDepth(Depths.buttons));
+                case BUTTON: {
+                    BoardState.ButtonEntity button = (BoardState.ButtonEntity) entity;
+                    // Put this layer in a container for clipping and animating
+                    GroupLayer group = new GroupLayer(1f, 1f);
+                    group.setOrigin(Layer.Origin.CENTER).setDepth(Depths.buttons);
+                    final Layer layer = sprites.createButtonLayer().setTint(blueDoorTint);
+                    group.addAt(layer, .5f, .5f);
+                    button.isDown.connectNotify(new Slot<Boolean>() {
+                        Animation.Handle handle = null;
+                        @Override public void onEmit(Boolean isDown) {
+                            float upY = .5f;
+                            float downY = .55f;
+                            if (handle != null) {handle.cancel(); handle = null;}
+                            handle = iface.anim.tweenY(layer).to(isDown ? downY : upY).in(100f).handle();
+                        }
+                    });
+                    return Optional.<Layer>of(group);
+                }
                 case DOOR: {
                     BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
                     // Put this layer in a container for clipping and animating
                     GroupLayer group = new GroupLayer(1f, 1f);
                     group.setOrigin(Layer.Origin.CENTER).setDepth(Depths.doors);
-                    final Layer layer1 = sprites.createDoorLayer().setTint(blueDoorTint);
-                    group.addAt(layer1, .5f, .5f);
+                    final Layer layer = sprites.createDoorLayer().setTint(blueDoorTint);
+                    group.addAt(layer, .5f, .5f);
                     door.isOpen.connectNotify(new Slot<Boolean>() {
                         Animation.Handle handle = null;
                         @Override public void onEmit(Boolean isOpen) {
                             float closedY = .5f;
                             float openY = 1.2f;
                             if (handle != null) {handle.cancel(); handle = null;}
-                            if (isOpen) {
-                                handle = iface.anim.tweenY(layer1).to(openY).easeInOut().handle();
-                            } else {
-                                handle = iface.anim.tweenY(layer1).to(closedY).easeInOut().handle();
-                            }
+                            handle = iface.anim.tweenY(layer).to(isOpen ? openY : closedY).easeInOut().handle();
                         }
                     });
                     return Optional.<Layer>of(group);
