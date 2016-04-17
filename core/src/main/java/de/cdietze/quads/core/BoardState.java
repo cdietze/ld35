@@ -71,7 +71,7 @@ public class BoardState {
         @Override public boolean canEnter(Entity e, Direction dir, int power) { return false; }
     }
 
-    private class PusherEntity extends Entity {
+    public class PusherEntity extends Entity {
         public PusherEntity(int initialFieldIndex) {
             super(Type.PUSHER, initialFieldIndex);
         }
@@ -101,7 +101,7 @@ public class BoardState {
         }
     }
 
-    private class ExpandoEntity extends Entity {
+    public class ExpandoEntity extends Entity {
         public ExpandoEntity(int initialFieldIndex) {
             super(Type.EXPANDO, initialFieldIndex);
         }
@@ -110,6 +110,7 @@ public class BoardState {
             super.beforeEntityEnters(e, dir);
             checkState(e.type == Type.PLAYER);
             entities.remove(this);
+            expandoConsumed.emit(this);
         }
         @Override public boolean keepPlayerTailOnEnter() { return true; }
     }
@@ -183,6 +184,7 @@ public class BoardState {
     public final RList<Entity> entities = RList.create();
     public final PlayerEntity playerEntity;
     public final Value<Boolean> playerWon = new Value<>(false);
+    public final Signal<ExpandoEntity> expandoConsumed = new Signal<>();
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
