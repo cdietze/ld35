@@ -23,7 +23,7 @@ public class BoardState {
 
     public static abstract class Entity {
         enum Type {
-            PLAYER, WALL, PUSHER, EXPANDO, DOOR, BUTTON;
+            PLAYER, WALL, PUSHER, EXPANDO, DOOR, BUTTON, GOAL;
         }
 
         public final Type type;
@@ -157,11 +157,28 @@ public class BoardState {
         }
     }
 
+    public class GoalEntity extends Entity {
+
+        public GoalEntity(int initialFieldIndex) {
+            super(Type.GOAL, initialFieldIndex);
+        }
+        @Override public boolean canEnter(Entity e, Direction dir) { return true; }
+        @Override public void beforeEntityEnters(Entity e, Direction dir) {
+            super.beforeEntityEnters(e, dir);
+            if (e.type == Type.PLAYER) {
+                playerWon.update(true);
+            }
+            // TODO - if pusher: remove?
+        }
+        @Override public void afterEntityLeft(Entity e) {
+            super.afterEntityLeft(e);
+        }
+    }
+
     public final Level level;
-
     public final RList<Entity> entities = RList.create();
-
     public final PlayerEntity playerEntity;
+    public final Value<Boolean> playerWon = new Value<>(false);
 
     public BoardState(Level level) {
         this.level = Objects.requireNonNull(level);
@@ -190,6 +207,7 @@ public class BoardState {
                 entities.add(new DoorEntity(i, fieldIndex, buttons));
             }
         }
+        entities.add(new GoalEntity(level.playerGoal));
     }
 
     public void tryMovePlayer(Direction dir) {
