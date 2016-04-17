@@ -30,7 +30,7 @@ public class MainGame extends SceneGame {
         super(plat, 33); // update our "simulation" 33ms (30 times per second)
 
         // create and add background image layer
-        Image bgImage = plat.assets().getImage("images/bg.png");
+        Image bgImage = plat.assets().getImage("images/clouds.png");
         ImageLayer bgLayer = new ImageLayer(bgImage);
         // scale the background to fill the screen
         bgLayer.setSize(plat.graphics().viewSize);
