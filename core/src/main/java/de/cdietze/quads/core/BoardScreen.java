@@ -13,7 +13,6 @@ import react.RList;
 import react.Slot;
 import tripleplay.anim.Animation;
 import tripleplay.ui.*;
-import tripleplay.ui.layout.AxisLayout;
 import tripleplay.ui.layout.BorderLayout;
 import tripleplay.util.Layers;
 
@@ -84,14 +83,8 @@ public class BoardScreen extends Screen {
         }
 
         private void initTitleDialog() {
-            final int levelIndex = Levels.levels.indexOf(level);
-            StringBuilder title = new StringBuilder();
-            if (levelIndex >= 0) {
-                title.append("Level " + (levelIndex + 1) + " - ");
-            }
-            title.append(level.title);
-            Group group = createDialogGroup();
-            group.add(new Label(title.toString()));
+            Group group = UiUtils.createDialogGroup(plat);
+            group.add(new Label(Levels.fullTitle(level)));
             DialogKeeper.Dialog display = createDialog(group).slideTopDown().display();
             iface.anim.delay(3000).then().action(display.dismissSlot());
         }
@@ -133,15 +126,19 @@ public class BoardScreen extends Screen {
                     if (!event.down) return;
                     switch (event.key) {
                         case LEFT:
+                        case A:
                             state.tryMovePlayer(Direction.LEFT);
                             break;
                         case RIGHT:
+                        case D:
                             state.tryMovePlayer(Direction.RIGHT);
                             break;
                         case UP:
+                        case W:
                             state.tryMovePlayer(Direction.UP);
                             break;
                         case DOWN:
+                        case S:
                             state.tryMovePlayer(Direction.DOWN);
                             break;
                         case ESCAPE:
@@ -157,33 +154,23 @@ public class BoardScreen extends Screen {
             state.playerWon.connectNotify(new Slot<Boolean>() {
                 @Override public void onEmit(Boolean won) {
                     if (!won) return;
-                    createDialog(createWinPanel()).useShade().slideTopDown().display();
-                }
-            });
-        }
-
-        private Group createWinPanel() {
-            Group group = createDialogGroup();
-            group.add(new Label("You solved it!"));
-            final int levelIndex = Levels.levels.indexOf(level);
-            if (levelIndex >= 0) {
-                if (levelIndex + 1 < Levels.levels.size()) {
-                    group.add(new Button("Next").onClick(new Slot<Button>() {
-                        @Override
-                        public void onEmit(Button event) {
-                            game.screens.replace(new BoardScreen(game, Levels.levels.get(levelIndex + 1)));
-                        }
-                    }));
-                } else {
+                    final int levelIndex = Levels.levels.indexOf(level);
+                    if (levelIndex >= 0 && levelIndex + 1 < Levels.levels.size()) {
+                        // Move silently on to the next level
+                        game.screens.replace(new BoardScreen(game, Levels.levels.get(levelIndex + 1)));
+                        return;
+                    }
+                    Group group = UiUtils.createDialogGroup(plat);
+                    group.add(new Label("You solved it!"));
                     group.add(new Label("You finished all levels. Congratulations!"));
                     group.add(new Button("Main Menu").onClick(new Slot<Button>() {
                         @Override public void onEmit(Button event) {
                             game.screens.remove(BoardScreen.this);
                         }
                     }));
+                    createDialog(group).useShade().slideTopDown().display();
                 }
-            }
-            return group;
+            });
         }
 
         private void toggleEscapeDialog() {
@@ -192,7 +179,7 @@ public class BoardScreen extends Screen {
                 escapeDialog = Optional.absent();
                 return;
             }
-            Group group = createDialogGroup();
+            Group group = UiUtils.createDialogGroup(plat);
             group.add(new Button("Restart").onClick(new Slot<Button>() {
                 @Override
                 public void onEmit(Button event) {
@@ -289,10 +276,6 @@ public class BoardScreen extends Screen {
                 }
             }
         };
-    }
-    private Group createDialogGroup() { /** Use the colors from {@link SimpleStyles} */
-        int bgColor = 0xFFCCCCCC, ulColor = 0xFFEEEEEE, brColor = 0xFFAAAAAA;
-        return new Group(AxisLayout.vertical()).setStyles(Style.BACKGROUND.is(Background.roundRect(plat.graphics(), bgColor, 5, ulColor, 2).inset(20f)));
     }
 
     private static Layer createFieldLayer() {
