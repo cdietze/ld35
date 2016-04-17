@@ -86,6 +86,14 @@ public class BoardScreen extends Screen {
             initWinListener();
             initInput();
             initTitleDialog();
+            initSoundListeners();
+        }
+        private void initSoundListeners() {
+            state.expandoConsumed.connect(new Slot<BoardState.ExpandoEntity>() {
+                @Override public void onEmit(BoardState.ExpandoEntity event) {
+                    eatExpando.play();
+                }
+            });
         }
 
         private void initTitleDialog() {
@@ -325,5 +333,6 @@ public class BoardScreen extends Screen {
     private Sound doorCloses = plat.assets().getSound("sounds/door_closes");
     private Sound doorOpens = plat.assets().getSound("sounds/door_opens");
     private Sound goalReached = plat.assets().getSound("sounds/goal_reached");
+    private Sound eatExpando = plat.assets().getSound("sounds/eat_expando");
 
 }
