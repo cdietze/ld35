@@ -12,8 +12,10 @@ import pythagoras.f.Dimension;
 import react.Connection;
 import react.RList;
 import react.Slot;
+import sun.plugin.util.UIUtil;
 import tripleplay.anim.Animation;
 import tripleplay.ui.*;
+import tripleplay.ui.layout.AxisLayout;
 import tripleplay.ui.layout.BorderLayout;
 import tripleplay.util.Layers;
 
@@ -54,7 +56,7 @@ public class BoardScreen extends Screen {
     @Override
     public void wasAdded() {
         super.wasAdded();
-        Root root = iface.createRoot(new BorderLayout(), SimpleStyles.newSheet(plat.graphics()), layer);
+        Root root = iface.createRoot(new BorderLayout(), UiUtils.newSheet(plat.graphics()), layer);
         // We define a maximum view size. Otherwise sprites become really blurry and its just too big
         Dimension maxSize = new Dimension(1200, 800);
         float width = Math.min(maxSize.width, plat.graphics().viewSize.width());
@@ -90,7 +92,7 @@ public class BoardScreen extends Screen {
         private void initTitleDialog() {
             Group group = UiUtils.createDialogGroup(plat);
             group.add(new Label(Levels.fullTitle(level)));
-            DialogKeeper.Dialog display = createDialog(group).slideTopDown().display();
+            DialogKeeper.Dialog display = createDialog(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics())).add(group).slideTopDown().display();
             iface.anim.delay(3000).then().action(display.dismissSlot());
         }
 
@@ -173,7 +175,7 @@ public class BoardScreen extends Screen {
                             game.screens.remove(BoardScreen.this);
                         }
                     }));
-                    createDialog(group).useShade().slideTopDown().display();
+                    createDialog(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics())).add(group).useShade().slideTopDown().display();
                 }
             });
         }
@@ -196,7 +198,7 @@ public class BoardScreen extends Screen {
                     game.screens.remove(BoardScreen.this);
                 }
             }));
-            escapeDialog = Optional.of(createDialog(group).useShade().slideTopDown().display());
+            escapeDialog = Optional.of(createDialog(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics())).add(group).useShade().slideTopDown().display());
         }
 
         private void initEntityLayers() {

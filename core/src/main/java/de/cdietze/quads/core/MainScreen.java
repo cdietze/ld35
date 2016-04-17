@@ -17,7 +17,7 @@ public class MainScreen extends Screen {
     @Override
     public void wasAdded() {
         super.wasAdded();
-        Root root = iface.createRoot(AxisLayout.vertical(), SimpleStyles.newSheet(plat.graphics()), layer);
+        Root root = iface.createRoot(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics()), layer);
         root.setSize(plat.graphics().viewSize);
 
         root.add(new Label("William's Dilemma").addStyles(Style.FONT.is(new Font("Helvetica", Font.Style.BOLD, 48))));
@@ -32,7 +32,7 @@ public class MainScreen extends Screen {
         root.add(new Button("Choose Level").onClick(new Slot<Button>() {
             @Override public void onEmit(Button event) {
                 Group group = UiUtils.createDialogGroup(plat);
-                final DialogKeeper.Dialog dialog = createDialog(group).useShade().slideTopDown();
+                final DialogKeeper.Dialog dialog = createDialog(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics())).add(group).useShade().slideTopDown();
                 for (int i = 0; i < Levels.levels.size(); i++) {
                     final Level level = Levels.levels.get(i);
                     group.add(new Button(Levels.fullTitle(level)).onClick(new Slot<Button>() {
