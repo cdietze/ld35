@@ -5,7 +5,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
-import pythagoras.i.IPoint;
 import pythagoras.i.Point;
 import react.*;
 import tripleplay.util.Logger;
@@ -78,7 +77,10 @@ public class BoardState {
         @Override public boolean canEnter(Entity e, Direction dir, int power) {
             if (power <= 0) return false;
             Point targetPos = toPoint(level.dim, fieldIndex.get(), tmp).addLocal(dir.x(), dir.y());
-            if (!canMoveHere(targetPos)) return false;
+            if (!level.rect.contains(targetPos)) return false;
+            int targetFieldIndex = toIndex(level.dim, targetPos);
+            // We may not step on the players tail
+            if(playerEntity.tail.contains(targetFieldIndex)) return false;
             List<Entity> targetEntities = entitiesAt(toIndex(level.dim, targetPos));
             for (Entity targetEntity : targetEntities) {
                 if (!targetEntity.canEnter(this, dir, power - 1)) return false;
@@ -228,7 +230,7 @@ public class BoardState {
 
     private boolean canMovePlayer(Direction dir) {
         Point pos = toPoint(level.dim, playerEntity.fieldIndex.get()).addLocal(dir.x(), dir.y());
-        if (!canMoveHere(pos)) return false;
+        if (!level.rect.contains(pos)) return false;
         List<Entity> targets = entitiesAt(toIndex(level.dim, pos));
         for (Entity target : targets) {
             if (!target.canEnter(playerEntity, dir, playerEntity.tail.size() + 1)) return false;
@@ -269,10 +271,6 @@ public class BoardState {
             if (entity.fieldIndex.get() == fieldIndex) result.add(entity);
         }
         return result;
-    }
-
-    private boolean canMoveHere(IPoint pos) {
-        return level.rect.contains(pos);
     }
 
     private Point tmp = new Point();
