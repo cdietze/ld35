@@ -154,6 +154,11 @@ public class BoardScreen extends Screen {
                     game.screens.replace(new BoardScreen(game, level));
                 }
             }));
+            group.add(new Button("Main Menu").onClick(new Slot<Button>() {
+                @Override public void onEmit(Button event) {
+                    game.screens.remove(BoardScreen.this);
+                }
+            }));
             return group;
         }
 

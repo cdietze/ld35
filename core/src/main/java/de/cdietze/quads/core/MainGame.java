@@ -39,8 +39,6 @@ public class MainGame extends SceneGame {
         // Register Pointer so we can handle any pointer input (clicks, mouse/touch events etc.)
         new Pointer(plat, rootLayer, true);
 
-        Level level = Levels.level1;
-
-        screens.push(new BoardScreen(this, level));
+        screens.push(new MainScreen(this));
     }
 }
