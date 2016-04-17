@@ -2,6 +2,7 @@ package de.cdietze.quads.core;
 
 import de.cdietze.playn_util.DialogKeeper;
 import de.cdietze.playn_util.Screen;
+import playn.core.Font;
 import react.Slot;
 import tripleplay.ui.*;
 import tripleplay.ui.layout.AxisLayout;
@@ -19,7 +20,8 @@ public class MainScreen extends Screen {
         Root root = iface.createRoot(AxisLayout.vertical(), SimpleStyles.newSheet(plat.graphics()), layer);
         root.setSize(plat.graphics().viewSize);
 
-        root.add(new Label("William's Dilemma"));
+        root.add(new Label("William's Dilemma").addStyles(Style.FONT.is(new Font("Helvetica", Font.Style.BOLD, 48))));
+        root.add(new Shim(1f, 50f));
 
         root.add(new Button("Start").onClick(new Slot<Button>() {
             @Override public void onEmit(Button event) {
