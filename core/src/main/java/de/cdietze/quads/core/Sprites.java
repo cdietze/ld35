@@ -33,7 +33,7 @@ public class Sprites {
     }
     public ImageLayer createHeadLayer() {
         ImageLayer imageLayer = new ImageLayer(images.head);
-        imageLayer.setSize(.9f, .9f).setOrigin(Layer.Origin.CENTER);
+        imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
     public ImageLayer createTailLayer() {
@@ -99,8 +99,8 @@ public class Sprites {
         canvas.fillCircle(.5f * size, .5f * size, radius);
 
         int eyeColor = 0xffffffff;
-        float eyeRadius = .2f * size;
-        float eyeX = .3f * size;
+        float eyeRadius = .15f * size;
+        float eyeX = .35f * size;
         float eyeY = .4f * size;
         canvas.setFillColor(eyeColor);
         canvas.fillCircle(eyeX, eyeY, eyeRadius);
@@ -113,7 +113,7 @@ public class Sprites {
 
         {
             // Draw Mouth
-            float x = .2f * size; float y = .68f * size;
+            float x = .25f * size; float y = .68f * size;
             float xOff = .1f * size; float yOff = .08f * size;
             canvas.setStrokeColor(Colors.BLACK).setStrokeWidth(DEFAULT_STROKE_WIDTH);
             canvas.strokePath(canvas.createPath().moveTo(x, y).bezierTo(x + xOff, y + yOff, size - x - xOff, y + yOff, size - x, y));
@@ -134,7 +134,7 @@ public class Sprites {
         float size = IMAGE_SIZE;
         float radius = .35f * size;
         int fillColor = 0xffB3A9A1;
-        int borderColor = 0xffEBE1D9;
+        int borderColor = Colors.brighter(fillColor);
         Canvas canvas = plat.graphics().createCanvas(size, size);
         canvas.setFillColor(fillColor).fillCircle(.5f * size, .5f * size, radius);
         canvas.setStrokeColor(borderColor).setStrokeWidth(DEFAULT_STROKE_WIDTH).strokeCircle(.5f * size, .5f * size, radius);
