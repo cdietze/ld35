@@ -334,7 +334,7 @@ function quads(){
     }
     var strongName;
     try {
-      strongName = '6939CC2E9E5E2650661FD8E1E5F84A1E';
+      strongName = '2DAD6D426EDBC1BAE39DBCB6008D7167';
       var idx = strongName.indexOf(':');
       if (idx != -1) {
         softPermutationId = parseInt(strongName.substring(idx + 1), 10);
