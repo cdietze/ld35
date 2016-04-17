@@ -38,6 +38,7 @@ public class Level {
 
     public final Dimension dim;
     public final Rectangle rect;
+    public final String title;
     public final int fieldCount;
     public final int playerStart;
     public final int playerGoal;
@@ -50,6 +51,7 @@ public class Level {
         dim = builder.dim.clone();
         rect = new Rectangle(dim);
         fieldCount = dim.width * dim.height;
+        title = builder.title;
         playerStart = builder.playerStart;
         checkState(playerStart >= 0);
         playerGoal = builder.playerGoal;
@@ -60,47 +62,9 @@ public class Level {
         doorLinks = ImmutableList.copyOf(Maps.transformValues(builder.doorLinks, DoorLink.builderFunction).values());
     }
 
-    public static Level read(String s) {
-        Builder builder = new Builder();
-        List<String> rows = Splitter.on('\n').splitToList(s);
-        Dimension dim = new Dimension(rows.get(0).length(), rows.size());
-        rows.get(0).length();
-        for (int y = 0; y < rows.size(); y++) {
-            String row = rows.get(y);
-            for (int x = 0; x < row.length(); ++x) {
-                char c = row.charAt(x);
-                handleChar(c, PointUtils.toIndex(dim, x, y), builder);
-            }
-        }
-
-        builder.dim(dim);
-        return builder.build();
-    }
-
-    private static void handleChar(char c, int index, Builder builder) {
-        Range<Character> doorRange = Range.closed('A', 'D');
-        Range<Character> buttonRange = Range.closed('a', 'd');
-        if (c == 'S') {
-            builder.playerStart(index);
-        } else if (c == 'G') {
-            builder.playerGoal(index);
-        } else if (c == 'W') {
-            builder.walls.add(index);
-        } else if (c == 'P') {
-            builder.pushEntity.add(index);
-        } else if (c == 'X') {
-            builder.expandoEntity.add(index);
-        } else if (c == '.') {
-        } else if (doorRange.contains(c)) {
-            builder.doorLink(c).doors.add(index);
-        } else if (buttonRange.contains(c)) {
-            builder.doorLink(Character.toUpperCase(c)).buttons.add(index);
-        } else
-            throw new AssertionError("unknown char in level description: '" + c + "'");
-    }
-
     public static final class Builder {
         public Dimension dim;
+        public String title;
         public int playerStart = -1;
         public int playerGoal = -1;
         public final List<Integer> walls = new ArrayList<>();
@@ -112,6 +76,10 @@ public class Level {
 
         public Builder dim(Dimension dim) {
             this.dim = dim.clone();
+            return this;
+        }
+        public Builder title(String title) {
+            this.title = title;
             return this;
         }
         public Builder playerStart(int val) {
@@ -126,6 +94,43 @@ public class Level {
             if (!doorLinks.containsKey(key)) { doorLinks.put(key, new Level.DoorLink.Builder()); }
             return doorLinks.get(key);
         }
+
+        public Level.Builder read(String s) {
+            List<String> rows = Splitter.on('\n').splitToList(s);
+            this.dim = new Dimension(rows.get(0).length(), rows.size());
+            rows.get(0).length();
+            for (int y = 0; y < rows.size(); y++) {
+                String row = rows.get(y);
+                for (int x = 0; x < row.length(); ++x) {
+                    char c = row.charAt(x);
+                    handleChar(c, PointUtils.toIndex(dim, x, y));
+                }
+            }
+            return this;
+        }
+
+        private void handleChar(char c, int index) {
+            Range<Character> doorRange = Range.closed('A', 'D');
+            Range<Character> buttonRange = Range.closed('a', 'd');
+            if (c == 'S') {
+                playerStart(index);
+            } else if (c == 'G') {
+                playerGoal(index);
+            } else if (c == 'W') {
+                walls.add(index);
+            } else if (c == 'P') {
+                pushEntity.add(index);
+            } else if (c == 'X') {
+                expandoEntity.add(index);
+            } else if (c == '.') {
+            } else if (doorRange.contains(c)) {
+                doorLink(c).doors.add(index);
+            } else if (buttonRange.contains(c)) {
+                doorLink(Character.toUpperCase(c)).buttons.add(index);
+            } else
+                throw new AssertionError("unknown char in level description: '" + c + "'");
+        }
+
         public Level build() {return new Level(this);}
     }
 }
