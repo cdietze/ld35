@@ -72,7 +72,7 @@ public class BoardScreen extends Screen {
                 @Override public void onAdd(int index, Integer fieldIndex) {
                     int x = toX(level.dim, fieldIndex);
                     int y = toY(level.dim, fieldIndex);
-                    Layer layer = sprites.createPlayerLayer();
+                    Layer layer = sprites.createTailLayer();
                     group.addAt(layer, x, y);
                     layers.add(index, layer);
                 }
@@ -81,8 +81,7 @@ public class BoardScreen extends Screen {
                 }
             });
 
-            final Layer headLayer = sprites.createPlayerLayer();
-            headLayer.setTint(0xffff0000);
+            final Layer headLayer = sprites.createHeadLayer();
             group.add(headLayer);
             player.fieldIndex.connectNotify(new Slot<Integer>() {
                 @Override public void onEmit(Integer headFieldIndex) {
