@@ -25,7 +25,7 @@ public class MainScreen extends Screen {
 
         root.add(new Button("Start").onClick(new Slot<Button>() {
             @Override public void onEmit(Button event) {
-                game.screens.push(new BoardScreen(game, Levels.level1));
+                game.screens.push(new BoardScreen(game, Levels.levels.get(0)));
             }
         }));
 

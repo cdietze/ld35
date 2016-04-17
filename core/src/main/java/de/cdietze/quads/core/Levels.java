@@ -7,7 +7,7 @@ import java.util.List;
 public final class Levels {
     private Levels() {}
 
-    public static final Level level1 = new Level.Builder()
+    public static final Level learnToWalk = new Level.Builder()
             .title("Where am I?")
             .read("" +
                     ".......\n" +
@@ -15,31 +15,42 @@ public final class Levels {
                     ".......").build();
 
     public static final Level introButtonAndPusher = new Level.Builder()
-            .title("A door, a button and a rock?")
+            .title("A door, a button and a rock that looks like a circle?")
             .read("" +
                     ".P..aWW\n" +
-                    "S....AG\n" +
+                    "S...A.G\n" +
                     ".....WW").build();
 
     public static final Level introExpandosForButtons = new Level.Builder()
             .title("Why is it glowing?")
             .read("" +
-                    "...a.WW\n" +
-                    "S....AG\n" +
+                    "..a..WW\n" +
+                    "S...A.G\n" +
                     "..XX.WW").build();
 
     public static final Level basicButtons = new Level.Builder()
-            .title("What is all this?")
+            .title("Why am I asking so many questions?")
             .read("" +
                     "XX...a.\n" +
                     ".......\n" +
-                    ".....WA\n" +
+                    "......A\n" +
                     "aP.S.W.\n" +
                     ".....P.\n" +
                     ".....WW\n" +
                     ".....AG").build();
 
-    public static final Level level2 = new Level.Builder()
+    public static final Level introPushMultiples = new Level.Builder()
+            .title("Just like Popeye")
+            .read("" +
+                    "...S...\n" +
+                    "PWWW...\n" +
+                    "PWXW..X\n" +
+                    ".W.WWWW\n" +
+                    "...PPP.\n" +
+                    ".WW....\n" +
+                    ".W....G").build();
+
+    public static final Level yummy = new Level.Builder()
             .title("Yummy!")
             .read("" +
                     "a.....a\n" +
@@ -58,10 +69,17 @@ public final class Levels {
                     ".WW....\n" +
                     "PW.PP..\n" +
                     "aa.S.WW\n" +
-                    "aa..WWG\n" +
+                    "aa...WG\n" +
                     "aa..A..").build();
 
-    public static final List<Level> levels = ImmutableList.of(level1, introButtonAndPusher, introExpandosForButtons, basicButtons, level2, level3);
+    public static final List<Level> levels = ImmutableList.of(
+            learnToWalk,
+            introButtonAndPusher,
+            introExpandosForButtons,
+            basicButtons,
+            introPushMultiples,
+            yummy,
+            level3);
 
     public static String fullTitle(Level level) {
         int levelIndex = levels.indexOf(level);
