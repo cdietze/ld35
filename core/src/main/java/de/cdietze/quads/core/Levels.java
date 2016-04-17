@@ -10,6 +10,13 @@ public final class Levels {
     public static final Level level1 = new Level.Builder()
             .title("Where am I?")
             .read("" +
+                    ".......\n" +
+                    "S.....G\n" +
+                    ".......").build();
+
+    public static final Level level1_2 = new Level.Builder()
+            .title("Where am I?")
+            .read("" +
                     "XX...a.\n" +
                     ".......\n" +
                     ".....WA\n" +
@@ -40,6 +47,15 @@ public final class Levels {
                     "aa..WWG\n" +
                     "aa..A..").build();
 
-    public static final List<Level> levels = ImmutableList.of(level1, level2, level3);
+    public static final List<Level> levels = ImmutableList.of(level1, level2);
 
+    public static String fullTitle(Level level) {
+        int levelIndex = levels.indexOf(level);
+        StringBuilder title = new StringBuilder();
+        if (levelIndex >= 0) {
+            title.append("Level " + (levelIndex + 1) + " - ");
+        }
+        title.append(level.title);
+        return title.toString();
+    }
 }

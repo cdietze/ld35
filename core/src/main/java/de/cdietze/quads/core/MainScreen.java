@@ -1,11 +1,9 @@
 package de.cdietze.quads.core;
 
+import de.cdietze.playn_util.DialogKeeper;
 import de.cdietze.playn_util.Screen;
 import react.Slot;
-import tripleplay.ui.Button;
-import tripleplay.ui.Label;
-import tripleplay.ui.Root;
-import tripleplay.ui.SimpleStyles;
+import tripleplay.ui.*;
 import tripleplay.ui.layout.AxisLayout;
 
 public class MainScreen extends Screen {
@@ -26,6 +24,23 @@ public class MainScreen extends Screen {
         root.add(new Button("Start").onClick(new Slot<Button>() {
             @Override public void onEmit(Button event) {
                 game.screens.push(new BoardScreen(game, Levels.level1));
+            }
+        }));
+
+        root.add(new Button("Choose Level").onClick(new Slot<Button>() {
+            @Override public void onEmit(Button event) {
+                Group group = UiUtils.createDialogGroup(plat);
+                final DialogKeeper.Dialog dialog = createDialog(group).useShade().slideTopDown();
+                for (int i = 0; i < Levels.levels.size(); i++) {
+                    final Level level = Levels.levels.get(i);
+                    group.add(new Button(Levels.fullTitle(level)).onClick(new Slot<Button>() {
+                        @Override public void onEmit(Button event) {
+                            game.screens.push(new BoardScreen(game, level));
+                        }
+                    }));
+                }
+                group.add(new Button("Close").onClick(dialog.dismissSlot()));
+                closeOnHide(dialog.display());
             }
         }));
     }
