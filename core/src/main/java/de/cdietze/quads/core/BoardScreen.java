@@ -46,7 +46,7 @@ public class BoardScreen extends Screen {
     public BoardScreen(MainGame game, Level level) {
         super(game);
         this.game = game;
-        this.sprites = new Sprites(plat);
+        this.sprites = new Sprites(this);
         this.state = new BoardState(level);
     }
 
