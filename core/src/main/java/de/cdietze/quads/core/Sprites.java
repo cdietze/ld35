@@ -14,6 +14,10 @@ public class Sprites {
     private static final int IMAGE_SIZE = 100;
     private static final float DEFAULT_STROKE_WIDTH = .05f * IMAGE_SIZE;
 
+    public interface Cols {
+        int PLAYER_BODY = 0xff00B30C;
+    }
+
     public final Platform plat;
     private final Images images;
 
@@ -34,7 +38,7 @@ public class Sprites {
     }
     public ImageLayer createTailLayer() {
         ImageLayer imageLayer = new ImageLayer(images.tail);
-        imageLayer.setSize(.9f, .9f).setOrigin(Layer.Origin.CENTER);
+        imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
     public ImageLayer createPusherLayer() {
@@ -49,6 +53,11 @@ public class Sprites {
     }
     public ImageLayer createDoorLayer() {
         ImageLayer imageLayer = new ImageLayer(images.door);
+        imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
+        return imageLayer;
+    }
+    public ImageLayer createExpandoLayer() {
+        ImageLayer imageLayer = new ImageLayer(images.expando);
         imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
@@ -80,9 +89,8 @@ public class Sprites {
     private Image drawHeadImage() {
         float size = IMAGE_SIZE;
         float radius = .4f * size;
-        int headColor = 0xff00B30C;
         Canvas canvas = plat.graphics().createCanvas(size, size);
-        canvas.setFillColor(headColor);
+        canvas.setFillColor(Cols.PLAYER_BODY);
         canvas.fillCircle(.5f * size, .5f * size, radius);
 
         int eyeColor = 0xffffffff;
@@ -110,10 +118,9 @@ public class Sprites {
 
     private Image drawTailImage() {
         float size = IMAGE_SIZE;
-        float radius = .4f * size;
-        int headColor = 0xff00B30C;
+        float radius = .35f * size;
         Canvas canvas = plat.graphics().createCanvas(size, size);
-        canvas.setFillColor(headColor);
+        canvas.setFillColor(Cols.PLAYER_BODY);
         canvas.fillCircle(.5f * size, .5f * size, radius);
         return canvas.image;
     }
@@ -158,6 +165,21 @@ public class Sprites {
         return canvas.image;
     }
 
+    private Image drawExpandoImage() {
+        float size = IMAGE_SIZE;
+        float radius = .35f * size;
+        Canvas canvas = plat.graphics().createCanvas(size, size);
+        canvas.setFillColor(Cols.PLAYER_BODY);
+        canvas.fillCircle(.5f * size, .5f * size, radius);
+
+        float lineMargin = .4f * size;
+        canvas.setStrokeWidth(.1f * size);
+        canvas.setStrokeColor(Colors.brighter(Cols.PLAYER_BODY));
+        canvas.drawLine(lineMargin, .5f * size, size - lineMargin, .5f * size);
+        canvas.drawLine(.5f * size, lineMargin, .5f * size, size - lineMargin);
+        return canvas.image;
+    }
+
     private final class Images {
         private Image circle = drawCircleImage();
         private Image head = drawHeadImage();
@@ -165,5 +187,6 @@ public class Sprites {
         private Image pusher = drawPusherImage();
         private Image button = drawButtonImage();
         private Image door = drawDoorImage();
+        private Image expando = drawExpandoImage();
     }
 }
