@@ -14,8 +14,8 @@ public final class Levels {
                     "S.....G\n" +
                     ".......").build();
 
-    public static final Level level1_2 = new Level.Builder()
-            .title("Where am I?")
+    public static final Level basicButtons = new Level.Builder()
+            .title("What is all this?")
             .read("" +
                     "XX...a.\n" +
                     ".......\n" +
@@ -37,7 +37,7 @@ public final class Levels {
                     "GWXXXXX").build();
 
     public static final Level level3 = new Level.Builder()
-            .title("This reminds me of a game I played...")
+            .title("This one reminds me of a game I played...")
             .read("" +
                     "XX.WWWW\n" +
                     "P..P.P.\n" +
@@ -47,7 +47,7 @@ public final class Levels {
                     "aa..WWG\n" +
                     "aa..A..").build();
 
-    public static final List<Level> levels = ImmutableList.of(level1, level2, level3);
+    public static final List<Level> levels = ImmutableList.of(level1, basicButtons, level2, level3);
 
     public static String fullTitle(Level level) {
         int levelIndex = levels.indexOf(level);
