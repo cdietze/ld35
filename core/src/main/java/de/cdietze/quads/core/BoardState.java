@@ -214,10 +214,14 @@ public class BoardState {
         entities.add(new GoalEntity(level.playerGoal));
     }
 
-    public void tryMovePlayer(Direction dir) {
-        if (playerWon.get()) return;
-        if (!canMovePlayer(dir)) return;
+    /**
+     * @return whether the player moved
+     */
+    public boolean tryMovePlayer(Direction dir) {
+        if (playerWon.get()) return false;
+        if (!canMovePlayer(dir)) return false;
         movePlayer(dir);
+        return true;
     }
 
     private boolean canMovePlayer(Direction dir) {
