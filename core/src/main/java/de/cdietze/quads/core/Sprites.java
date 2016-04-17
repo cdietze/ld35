@@ -10,7 +10,7 @@ import playn.scene.Layer;
 import tripleplay.util.Colors;
 
 public class Sprites {
-    private static final int IMAGE_SIZE = 100;
+    private static final int IMAGE_SIZE = 200;
     private static final float DEFAULT_STROKE_WIDTH = .05f * IMAGE_SIZE;
     private final Screen screen;
 
