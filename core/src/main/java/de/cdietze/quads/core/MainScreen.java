@@ -41,7 +41,7 @@ public class MainScreen extends Screen {
                         }
                     }));
                 }
-                group.add(new Button("Close").onClick(dialog.dismissSlot()));
+                group.add(new Shim(1f, 20f), new Button("Close").onClick(dialog.dismissSlot()));
                 closeOnHide(dialog.display());
             }
         }));
