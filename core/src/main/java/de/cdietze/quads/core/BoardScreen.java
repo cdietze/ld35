@@ -177,7 +177,7 @@ public class BoardScreen extends Screen {
                     case EXPANDO:
                         return sprites.createEntityLayer().setTint(0xffff0000);
                     case BUTTON:
-                        return sprites.createEntityLayer().setTint(0xff0000ff);
+                        return sprites.createButtonLayer().setTint(0xff8D8DEB);
                     case DOOR: {
                         BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
                         final Layer layer = sprites.createEntityLayer();

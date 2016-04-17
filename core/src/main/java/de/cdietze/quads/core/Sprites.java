@@ -29,17 +29,22 @@ public class Sprites {
     }
     public ImageLayer createHeadLayer() {
         ImageLayer imageLayer = new ImageLayer(images.head);
-        imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
+        imageLayer.setSize(.9f, .9f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
     public ImageLayer createTailLayer() {
         ImageLayer imageLayer = new ImageLayer(images.tail);
-        imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
+        imageLayer.setSize(.9f, .9f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
     public ImageLayer createPusherLayer() {
         ImageLayer imageLayer = new ImageLayer(images.pusher);
-        imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
+        imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
+        return imageLayer;
+    }
+    public ImageLayer createButtonLayer() {
+        ImageLayer imageLayer = new ImageLayer(images.button);
+        imageLayer.setSize(1f, 1f).setOrigin(Layer.Origin.CENTER);
         return imageLayer;
     }
 
@@ -110,7 +115,7 @@ public class Sprites {
 
     private Image drawPusherImage() {
         float size = IMAGE_SIZE;
-        float radius = .4f * size;
+        float radius = .35f * size;
         int fillColor = 0xffB3A9A1;
         int borderColor = 0xffEBE1D9;
         Canvas canvas = plat.graphics().createCanvas(size, size);
@@ -119,10 +124,28 @@ public class Sprites {
         return canvas.image;
     }
 
+    private Image drawButtonImage() {
+        float size = IMAGE_SIZE;
+        Canvas canvas = plat.graphics().createCanvas(size, size);
+        canvas.save().translate(0, .3f * size).setFillColor(Colors.BLACK);
+        drawSingleButton(canvas, size);
+        canvas.restore().save().translate(0f, .2f * size).setFillColor(Colors.WHITE);
+        drawSingleButton(canvas, size);
+        return canvas.image;
+    }
+    private Canvas drawSingleButton(Canvas canvas, float size) {
+        float width = .8f * size;
+        float height = .4f * size;
+        float x = .5f * (size - width);
+        float y = .5f * (size - height);
+        return canvas.fillRoundRect(x, y, width, height, .1f * size);
+    }
+
     private final class Images {
         private Image circle = drawCircleImage();
         private Image head = drawHeadImage();
         private Image tail = drawTailImage();
         private Image pusher = drawPusherImage();
+        private Image button = drawButtonImage();
     }
 }
