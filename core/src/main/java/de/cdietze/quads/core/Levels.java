@@ -37,7 +37,7 @@ public final class Levels {
                     "aP.S.W.\n" +
                     ".....P.\n" +
                     ".....WW\n" +
-                    ".....AG").build();
+                    "....A.G").build();
 
     public static final Level introPushMultiples = new Level.Builder()
             .title("Just like Popeye")
