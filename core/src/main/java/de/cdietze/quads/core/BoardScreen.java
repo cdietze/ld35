@@ -5,6 +5,7 @@ import de.cdietze.playn_util.DialogKeeper;
 import de.cdietze.playn_util.ScaledElement;
 import de.cdietze.playn_util.Screen;
 import playn.core.Keyboard;
+import playn.core.Sound;
 import playn.scene.GroupLayer;
 import playn.scene.Layer;
 import pythagoras.f.Dimension;
@@ -132,19 +133,19 @@ public class BoardScreen extends Screen {
                     switch (event.key) {
                         case LEFT:
                         case A:
-                            state.tryMovePlayer(Direction.LEFT);
+                            tryMove(Direction.LEFT);
                             break;
                         case RIGHT:
                         case D:
-                            state.tryMovePlayer(Direction.RIGHT);
+                            tryMove(Direction.RIGHT);
                             break;
                         case UP:
                         case W:
-                            state.tryMovePlayer(Direction.UP);
+                            tryMove(Direction.UP);
                             break;
                         case DOWN:
                         case S:
-                            state.tryMovePlayer(Direction.DOWN);
+                            tryMove(Direction.DOWN);
                             break;
                         case ESCAPE:
                             toggleEscapeDialog();
@@ -155,10 +156,17 @@ public class BoardScreen extends Screen {
             closeOnHide(conn);
         }
 
+        private void tryMove(Direction dir) {
+            if (!state.tryMovePlayer(dir)) {
+                cannotMove.play();
+            }
+        }
+
         private void initWinListener() {
             state.playerWon.connectNotify(new Slot<Boolean>() {
                 @Override public void onEmit(Boolean won) {
                     if (!won) return;
+                    goalReached.play();
                     final int levelIndex = Levels.levels.indexOf(level);
                     if (levelIndex >= 0 && levelIndex + 1 < Levels.levels.size()) {
                         // Move silently on to the next level
@@ -240,6 +248,7 @@ public class BoardScreen extends Screen {
                     button.isDown.connectNotify(new Slot<Boolean>() {
                         Animation.Handle handle = null;
                         @Override public void onEmit(Boolean isDown) {
+                            if (isDown) buttonPressed.play();
                             float upY = .5f;
                             float downY = .55f;
                             if (handle != null) {handle.cancel(); handle = null;}
@@ -262,6 +271,13 @@ public class BoardScreen extends Screen {
                             float openY = 1.2f;
                             if (handle != null) {handle.cancel(); handle = null;}
                             handle = iface.anim.tweenY(layer).to(isOpen ? openY : closedY).easeInOut().handle();
+                        }
+                    });
+                    door.isOpen.connect(new Slot<Boolean>() {
+                        @Override public void onEmit(Boolean isOpen) {
+                            // Delay this sound a bit to avoid collisions with button-sounds.
+                            // Also, the door just needs a bit to get moving
+                            iface.anim.delay(400).then().play(isOpen ? doorOpens : doorCloses);
                         }
                     });
                     return Optional.<Layer>of(group);
@@ -303,4 +319,11 @@ public class BoardScreen extends Screen {
         Layer l = Layers.solid(0xff999999, 1f - 2 * fieldGapWidth, 1f - 2 * fieldGapWidth).setOrigin(Layer.Origin.CENTER);
         return l;
     }
+
+    private Sound buttonPressed = plat.assets().getSound("sounds/button_pressed");
+    private Sound cannotMove = plat.assets().getSound("sounds/cannot_move");
+    private Sound doorCloses = plat.assets().getSound("sounds/door_closes");
+    private Sound doorOpens = plat.assets().getSound("sounds/door_opens");
+    private Sound goalReached = plat.assets().getSound("sounds/goal_reached");
+
 }
