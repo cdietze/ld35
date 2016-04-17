@@ -5,7 +5,6 @@ import de.cdietze.playn_util.ScaledElement;
 import de.cdietze.playn_util.Screen;
 import playn.core.Keyboard;
 import playn.scene.GroupLayer;
-import playn.scene.ImageLayer;
 import playn.scene.Layer;
 import react.RList;
 import react.Slot;
@@ -24,6 +23,17 @@ import static de.cdietze.quads.core.PointUtils.toX;
 import static de.cdietze.quads.core.PointUtils.toY;
 
 public class BoardScreen extends Screen {
+
+    private interface Depths {
+        float fields = -1f;
+        float player = 10f;
+        float buttons = 5f;
+        float doors = 20f;
+        float pushers = 15f;
+        float expandos = 0f;
+        float walls = 0f;
+        float goals = 0f;
+    }
 
     private final BoardState state;
     private final Sprites sprites;
@@ -84,6 +94,7 @@ public class BoardScreen extends Screen {
 
             final Layer headLayer = sprites.createHeadLayer();
             group.add(headLayer);
+            group.setDepth(Depths.player);
             player.fieldIndex.connectNotify(new Slot<Integer>() {
                 @Override public void onEmit(Integer headFieldIndex) {
                     int x = toX(level.dim, headFieldIndex);
@@ -122,7 +133,7 @@ public class BoardScreen extends Screen {
             int fieldIndex = level.playerGoal;
             int x = toX(level.dim, fieldIndex);
             int y = toY(level.dim, fieldIndex);
-            ImageLayer layer = sprites.createGoalLayer();
+            Layer layer = sprites.createGoalLayer().setDepth(Depths.goals);
             gridLayer.addAt(layer, x, y);
         }
 
@@ -157,7 +168,7 @@ public class BoardScreen extends Screen {
         private List<Layer> createFieldLayers() {
             ImmutableList.Builder<Layer> builder = ImmutableList.builder();
             for (int fieldIndex = 0; fieldIndex < level.fieldCount; ++fieldIndex) {
-                Layer fieldLayer = BoardScreen.createFieldLayer();
+                Layer fieldLayer = BoardScreen.createFieldLayer().setDepth(Depths.fields);
                 int x = toX(level.dim, fieldIndex);
                 int y = toY(level.dim, fieldIndex);
                 gridLayer.addAt(fieldLayer, x, y);
@@ -171,18 +182,18 @@ public class BoardScreen extends Screen {
                 final int blueDoorTint = 0xff8D8DEB;
                 switch (entity.type) {
                     case WALL:
-                        return createFieldLayer().setTint(0xff222222);
+                        return createFieldLayer().setTint(0xff222222).setDepth(Depths.walls);
                     case PUSHER:
-                        return sprites.createPusherLayer();
+                        return sprites.createPusherLayer().setDepth(Depths.pushers);
                     case EXPANDO:
-                        return sprites.createExpandoLayer();
+                        return sprites.createExpandoLayer().setDepth(Depths.expandos);
                     case BUTTON:
-                        return sprites.createButtonLayer().setTint(blueDoorTint);
+                        return sprites.createButtonLayer().setTint(blueDoorTint).setDepth(Depths.buttons);
                     case DOOR: {
                         BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
                         // Put this layer in a container for clipping and animating
                         GroupLayer group = new GroupLayer(1f, 1f);
-                        group.setOrigin(Layer.Origin.CENTER);
+                        group.setOrigin(Layer.Origin.CENTER).setDepth(Depths.doors);
                         final Layer layer = sprites.createDoorLayer().setTint(blueDoorTint);
                         group.addAt(layer, .5f, .5f);
                         door.isOpen.connectNotify(new Slot<Boolean>() {
