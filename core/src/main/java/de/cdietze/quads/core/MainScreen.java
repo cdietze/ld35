@@ -35,7 +35,7 @@ public class MainScreen extends Screen {
                 final DialogKeeper.Dialog dialog = createDialog(AxisLayout.vertical(), UiUtils.newSheet(plat.graphics())).add(group).useShade().slideTopDown();
                 for (int i = 0; i < Levels.levels.size(); i++) {
                     final Level level = Levels.levels.get(i);
-                    group.add(new Button(Levels.fullTitle(level)).onClick(new Slot<Button>() {
+                    group.add(new Button(Levels.briefTitle(level)).onClick(new Slot<Button>() {
                         @Override public void onEmit(Button event) {
                             game.screens.push(new BoardScreen(game, level));
                         }

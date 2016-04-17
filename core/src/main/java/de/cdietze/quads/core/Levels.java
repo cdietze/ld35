@@ -22,7 +22,7 @@ public final class Levels {
                     ".....WW").build();
 
     public static final Level introExpandosForButtons = new Level.Builder()
-            .title("Why is it glowing?")
+            .title("Why are these things glowing?")
             .read("" +
                     "..a..WW\n" +
                     "S...A.G\n" +
@@ -40,7 +40,7 @@ public final class Levels {
                     "....A.G").build();
 
     public static final Level introPushMultiples = new Level.Builder()
-            .title("Just like Popeye")
+            .title("I need to grow to be stronger")
             .read("" +
                     "...S...\n" +
                     "PWWW...\n" +
@@ -61,8 +61,34 @@ public final class Levels {
                     ".WXXXXX\n" +
                     "GWXXXXX").build();
 
-    public static final Level level3 = new Level.Builder()
-            .title("This one reminds me of a game I played...")
+    public static final Level backAndForth = new Level.Builder()
+            .title("If I ever make a game I will have YOU running around!")
+            .read("" +
+                    "S....WWWWXW\n" +
+                    ".PP..PPPPP.\n" +
+                    "WXW.....W..\n" +
+                    "..W....WWXW\n" +
+                    ".PPPP..PPP.\n" +
+                    "WXWWW...W..\n" +
+                    "..W.....WXW\n" +
+                    ".PPPPPP..P.\n" +
+                    "WGWWWWW....").build();
+
+    public static final Level christmas = new Level.Builder()
+            .title("Oh come on, is it christmas already!?")
+            .read("" +
+                    "S...WGW....\n" +
+                    "...WWAWW...\n" +
+                    "...Wa.aW...\n" +
+                    "..WWWXWWW..\n" +
+                    "..Wa.X.aW..\n" +
+                    ".WWWWXWWWW.\n" +
+                    ".Wa..X..aW.\n" +
+                    ".WWWWXWWWW.\n" +
+                    "XXXXXXXXXXX").build();
+
+    public static final Level eightiesStyle = new Level.Builder()
+            .title("This one reminds me of a game I played in the 80s")
             .read("" +
                     "XX.WWWW\n" +
                     "P..P.P.\n" +
@@ -79,7 +105,14 @@ public final class Levels {
             basicButtons,
             introPushMultiples,
             yummy,
-            level3);
+            eightiesStyle,
+            christmas,
+            backAndForth);
+
+    public static String briefTitle(Level level) {
+        int levelIndex = levels.indexOf(level);
+        return "Level " + (levelIndex < 0 ? "?" : (levelIndex + 1));
+    }
 
     public static String fullTitle(Level level) {
         int levelIndex = levels.indexOf(level);
