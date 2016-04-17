@@ -211,6 +211,7 @@ public class BoardState {
     }
 
     public void tryMovePlayer(Direction dir) {
+        if (playerWon.get()) return;
         if (!canMovePlayer(dir)) return;
         movePlayer(dir);
     }

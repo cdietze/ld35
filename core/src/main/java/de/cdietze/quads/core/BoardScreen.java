@@ -1,6 +1,8 @@
 package de.cdietze.quads.core;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import de.cdietze.playn_util.DialogKeeper;
 import de.cdietze.playn_util.ScaledElement;
 import de.cdietze.playn_util.Screen;
 import playn.core.Keyboard;
@@ -39,6 +41,8 @@ public class BoardScreen extends Screen {
     public final MainGame game;
     private final Sprites sprites;
     private final BoardState state;
+
+    private Optional<DialogKeeper.Dialog> escapeDialog = Optional.absent();
 
     public BoardScreen(MainGame game, Level level) {
         super(game);
@@ -126,15 +130,13 @@ public class BoardScreen extends Screen {
                         case DOWN:
                             state.tryMovePlayer(Direction.DOWN);
                             break;
+                        case ESCAPE:
+                            toggleEscapeDialog();
+                            break;
                     }
                 }
             });
             closeOnHide(conn);
-            state.playerWon.connectNotify(new Slot<Boolean>() {
-                @Override public void onEmit(Boolean won) {
-                    if (won) conn.close();
-                }
-            });
         }
 
         private void initWinListener() {
@@ -147,9 +149,7 @@ public class BoardScreen extends Screen {
         }
 
         private Group createWinPanel() {
-            /** Use the colors from {@link SimpleStyles} */
-            int bgColor = 0xFFCCCCCC, ulColor = 0xFFEEEEEE, brColor = 0xFFAAAAAA;
-            Group group = new Group(AxisLayout.vertical()).setStyles(Style.BACKGROUND.is(Background.roundRect(plat.graphics(), bgColor, 5, ulColor, 2).inset(20f)));
+            Group group = createDialogGroup();
             group.add(new Label("You won!"));
             group.add(new Button("Play again").onClick(new Slot<Button>() {
                 @Override
@@ -163,6 +163,27 @@ public class BoardScreen extends Screen {
                 }
             }));
             return group;
+        }
+
+        private void toggleEscapeDialog() {
+            if (escapeDialog.isPresent()) {
+                escapeDialog.get().close();
+                escapeDialog = Optional.absent();
+                return;
+            }
+            Group group = createDialogGroup();
+            group.add(new Button("Restart").onClick(new Slot<Button>() {
+                @Override
+                public void onEmit(Button event) {
+                    game.screens.replace(new BoardScreen(game, level));
+                }
+            }));
+            group.add(new Button("Main Menu").onClick(new Slot<Button>() {
+                @Override public void onEmit(Button event) {
+                    game.screens.remove(BoardScreen.this);
+                }
+            }));
+            escapeDialog = Optional.of(createDialog(group).useShade().slideTopDown().display());
         }
 
         private void initEntityLayers() {
@@ -247,6 +268,10 @@ public class BoardScreen extends Screen {
                 }
             }
         };
+    }
+    private Group createDialogGroup() { /** Use the colors from {@link SimpleStyles} */
+        int bgColor = 0xFFCCCCCC, ulColor = 0xFFEEEEEE, brColor = 0xFFAAAAAA;
+        return new Group(AxisLayout.vertical()).setStyles(Style.BACKGROUND.is(Background.roundRect(plat.graphics(), bgColor, 5, ulColor, 2).inset(20f)));
     }
 
     private static Layer createFieldLayer() {
