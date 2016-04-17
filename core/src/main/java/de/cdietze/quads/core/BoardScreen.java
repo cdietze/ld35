@@ -3,10 +3,7 @@ package de.cdietze.quads.core;
 import com.google.common.collect.ImmutableList;
 import de.cdietze.playn_util.ScaledElement;
 import de.cdietze.playn_util.Screen;
-import playn.core.Canvas;
-import playn.core.Image;
 import playn.core.Keyboard;
-import playn.core.Path;
 import playn.scene.GroupLayer;
 import playn.scene.ImageLayer;
 import playn.scene.Layer;
@@ -28,10 +25,12 @@ import static de.cdietze.quads.core.PointUtils.toY;
 public class BoardScreen extends Screen {
 
     private final BoardState state;
+    private final Sprites sprites;
 
     public BoardScreen(MainGame game, BoardState state) {
         super(game);
         this.state = state;
+        this.sprites = new Sprites(plat);
     }
 
     @Override
@@ -73,7 +72,7 @@ public class BoardScreen extends Screen {
                 @Override public void onAdd(int index, Integer fieldIndex) {
                     int x = toX(level.dim, fieldIndex);
                     int y = toY(level.dim, fieldIndex);
-                    Layer layer = createPlayerLayer();
+                    Layer layer = sprites.createPlayerLayer();
                     group.addAt(layer, x, y);
                     layers.add(index, layer);
                 }
@@ -82,7 +81,7 @@ public class BoardScreen extends Screen {
                 }
             });
 
-            final Layer headLayer = createPlayerLayer();
+            final Layer headLayer = sprites.createPlayerLayer();
             headLayer.setTint(0xffff0000);
             group.add(headLayer);
             player.fieldIndex.connectNotify(new Slot<Integer>() {
@@ -123,7 +122,7 @@ public class BoardScreen extends Screen {
             int fieldIndex = level.playerGoal;
             int x = toX(level.dim, fieldIndex);
             int y = toY(level.dim, fieldIndex);
-            ImageLayer layer = createEntityLayer();
+            ImageLayer layer = sprites.createEntityLayer();
             layer.setTint(0xff00ff00);
 
             gridLayer.addAt(layer, x, y);
@@ -169,32 +168,20 @@ public class BoardScreen extends Screen {
             return builder.build();
         }
 
-        private ImageLayer createEntityLayer() {
-            ImageLayer imageLayer = new ImageLayer(circleImage);
-            imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
-            return imageLayer;
-        }
-
-        private ImageLayer createPlayerLayer() {
-            ImageLayer imageLayer = new ImageLayer(drawHeartImage());
-            imageLayer.setSize(.8f, .8f).setOrigin(Layer.Origin.CENTER);
-            return imageLayer;
-        }
-
         private EntityLayerProvider entityLayerProvider = new EntityLayerProvider() {
             @Override public Layer createLayer(BoardState.Entity entity) {
                 switch (entity.type) {
                     case WALL:
                         return createFieldLayer().setTint(0xff222222);
                     case PUSHER:
-                        return createEntityLayer();
+                        return sprites.createEntityLayer();
                     case EXPANDO:
-                        return createEntityLayer().setTint(0xffff0000);
+                        return sprites.createEntityLayer().setTint(0xffff0000);
                     case BUTTON:
-                        return createEntityLayer().setTint(0xff0000ff);
+                        return sprites.createEntityLayer().setTint(0xff0000ff);
                     case DOOR: {
                         BoardState.DoorEntity door = (BoardState.DoorEntity) entity;
-                        final Layer layer = createEntityLayer();
+                        final Layer layer = sprites.createEntityLayer();
                         door.isOpen.connectNotify(new Slot<Boolean>() {
                             @Override public void onEmit(Boolean isOpen) {
                                 layer.setTint(isOpen ? 0xff0000ff : 0xff000099);
@@ -207,44 +194,6 @@ public class BoardScreen extends Screen {
                 }
             }
         };
-
-        private Image circleImage = drawCircleImage();
-        private Image crossImage = drawCrossImage();
-
-        private Image drawCircleImage() {
-            float size = 100;
-            float radius = .45f * size;
-            Canvas canvas = plat.graphics().createCanvas(size, size);
-            canvas.setStrokeColor(0xffffffff);
-            canvas.setStrokeWidth(size / 20);
-            canvas.strokeCircle(size / 2, size / 2, radius);
-            return canvas.image;
-        }
-
-        private Image drawHeartImage() {
-            float size = 100;
-            float radius = .2f * size;
-            float margin = .1f * size;
-            Canvas canvas = plat.graphics().createCanvas(size, size);
-            canvas.setFillColor(0xffffffff);
-            canvas.fillCircle(margin + radius, margin + radius, radius);
-            canvas.fillCircle(size - (margin + radius), margin + radius, radius);
-            float pathYStart = margin + .25f * size;
-            Path path = canvas.createPath().moveTo(margin, pathYStart).lineTo(size / 2, size - margin).lineTo(size - margin, pathYStart).close();
-            canvas.fillPath(path);
-            return canvas.image;
-        }
-
-        private Image drawCrossImage() {
-            float size = 100;
-            float margin = .1f * size;
-            Canvas canvas = plat.graphics().createCanvas(size, size);
-            canvas.setStrokeColor(0xff222222);
-            canvas.setStrokeWidth(size / 20);
-            canvas.drawLine(margin, margin, size - margin, size - margin);
-            canvas.drawLine(size - margin, margin, margin, size - margin);
-            return canvas.image;
-        }
     }
 
     private static Layer createFieldLayer() {
