@@ -97,6 +97,11 @@ public class BoardScreen extends Screen {
                     eatExpando.play();
                 }
             });
+            state.playerPushes.connect(new Slot<BoardState.PusherEntity>() {
+                @Override public void onEmit(BoardState.PusherEntity event) {
+                    slidePusher.play();
+                }
+            });
         }
 
         private void initTitleDialog() {
@@ -342,5 +347,8 @@ public class BoardScreen extends Screen {
     private Sound doorOpens = plat.assets().getSound("sounds/door_opens");
     private Sound goalReached = plat.assets().getSound("sounds/goal_reached");
     private Sound eatExpando = plat.assets().getSound("sounds/eat_expando");
-
+    private Sound slidePusher = plat.assets().getSound("sounds/slide_pusher");
+    {
+        slidePusher.setVolume(0.15f);
+    }
 }
