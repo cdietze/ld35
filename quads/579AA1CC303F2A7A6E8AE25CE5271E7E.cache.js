@@ -3,7 +3,7 @@ var __gwtModuleFunction = $wnd.quads;
 var $sendStats = __gwtModuleFunction.__sendStats;
 $sendStats('moduleStartup', 'moduleEvalStart');
 var $gwt_version = "2.7.0";
-var $strongName = '1B5BD578185AF9B226F1447982FB6AD4';
+var $strongName = '579AA1CC303F2A7A6E8AE25CE5271E7E';
 var $gwt = {};
 var $doc = $wnd.document;
 var $moduleName, $moduleBase;
@@ -7387,7 +7387,7 @@ function $createFieldLayers(this$static){
     if (this$static.this$01.state.level.walls.contains_0(valueOf_0(fieldIndex))) {
       continue;
     }
-    fieldLayer = $setDepth(($clinit_BoardScreen() , color_0 = fieldIndex % 2 == 0?-4802890:-9796175 , $setOrigin_0(new Layers$2($intern_35, $intern_35, color_0), ($clinit_Layer$Origin() , CENTER_0))), -1);
+    fieldLayer = $setDepth(($clinit_BoardScreen() , color_0 = fieldIndex % 2 == 0?-4802890:-7497040 , $setOrigin_0(new Layers$2($intern_35, $intern_35, color_0), ($clinit_Layer$Origin() , CENTER_0))), -1);
     x_0 = toX(this$static.level.dim, fieldIndex);
     y_0 = toY(this$static.level.dim, fieldIndex);
     $addAt(this$static.gridLayer, fieldLayer, x_0, y_0);
