@@ -12,7 +12,6 @@ import pythagoras.f.Dimension;
 import react.Connection;
 import react.RList;
 import react.Slot;
-import sun.plugin.util.UIUtil;
 import tripleplay.anim.Animation;
 import tripleplay.ui.*;
 import tripleplay.ui.layout.AxisLayout;
