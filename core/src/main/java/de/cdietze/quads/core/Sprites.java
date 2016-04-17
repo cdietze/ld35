@@ -64,30 +64,6 @@ public class Sprites {
         return imageLayer;
     }
 
-    private Image drawCircleImage() {
-        float size = 100;
-        float radius = .45f * size;
-        Canvas canvas = plat.graphics().createCanvas(size, size);
-        canvas.setStrokeColor(0xffffffff);
-        canvas.setStrokeWidth(size / 20);
-        canvas.strokeCircle(size / 2, size / 2, radius);
-        return canvas.image;
-    }
-
-    private Image drawHeartImage() {
-        float size = IMAGE_SIZE;
-        float radius = .2f * size;
-        float margin = .1f * size;
-        Canvas canvas = plat.graphics().createCanvas(size, size);
-        canvas.setFillColor(0xffffffff);
-        canvas.fillCircle(margin + radius, margin + radius, radius);
-        canvas.fillCircle(size - (margin + radius), margin + radius, radius);
-        float pathYStart = margin + .25f * size;
-        Path path = canvas.createPath().moveTo(margin, pathYStart).lineTo(size / 2, size - margin).lineTo(size - margin, pathYStart).close();
-        canvas.fillPath(path);
-        return canvas.image;
-    }
-
     private Image drawHeadImage() {
         float size = IMAGE_SIZE;
         float radius = .4f * size;
@@ -204,7 +180,6 @@ public class Sprites {
     }
 
     private final class Images {
-        private Image circle = drawCircleImage();
         private Image head = drawHeadImage();
         private Image tail = drawTailImage();
         private Image pusher = drawPusherImage();
