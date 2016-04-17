@@ -3,7 +3,7 @@ var __gwtModuleFunction = $wnd.quads;
 var $sendStats = __gwtModuleFunction.__sendStats;
 $sendStats('moduleStartup', 'moduleEvalStart');
 var $gwt_version = "2.7.0";
-var $strongName = '2DAD6D426EDBC1BAE39DBCB6008D7167';
+var $strongName = '1B5BD578185AF9B226F1447982FB6AD4';
 var $gwt = {};
 var $doc = $wnd.document;
 var $moduleName, $moduleBase;
@@ -22,7 +22,7 @@ var $stats = $wnd.__gwtStatsEvent ? function(a) {
 return $wnd.__gwtStatsEvent && $wnd.__gwtStatsEvent(a);
 } : null;
 var $sessionId = $wnd.__gwtStatsSessionId ? $wnd.__gwtStatsSessionId : null;
-var $intern_0 = 2147483647, $intern_1 = {3:1, 5:1}, $intern_2 = {3:1, 29:1, 35:1}, $intern_3 = {212:1, 3:1}, $intern_4 = 65535, $intern_5 = {111:1}, $intern_6 = {28:1}, $intern_7 = {57:1, 3:1, 7:1}, $intern_8 = {64:1, 3:1, 29:1, 35:1}, $intern_9 = {167:1, 112:1, 3:1, 7:1, 6:1}, $intern_10 = {42:1}, $intern_11 = {67:1}, $intern_12 = {3:1, 15:1, 8:1, 10:1}, $intern_13 = {72:1, 16:1, 3:1, 7:1, 6:1}, $intern_14 = {52:1, 16:1, 3:1, 7:1, 6:1}, $intern_15 = {16:1, 53:1, 3:1, 7:1, 6:1}, $intern_16 = {16:1, 54:1, 3:1, 7:1, 6:1}, $intern_17 = {24:1, 3:1, 7:1, 6:1}, $intern_18 = {16:1, 100:1, 3:1, 7:1, 6:1}, $intern_19 = {16:1, 39:1, 3:1, 7:1, 6:1}, $intern_20 = {104:1, 3:1, 15:1, 8:1, 10:1}, $intern_21 = 4194303, $intern_22 = 524288, $intern_23 = {95:1, 68:1, 84:1, 83:1, 96:1, 55:1, 44:1}, $intern_24 = 65536, $intern_25 = 16777216, $intern_26 = 33554432, $intern_27 = 67108864, $intern_28 = {13:1, 12:1}, $intern_29 = {40:1, 3:1, 7:1, 6:1}, $intern_30 = 0.009999999776482582, $intern_31 = 16777215, $intern_32 = {13:1, 19:1, 12:1}, $intern_33 = -16777216, $intern_34 = {14:1}, $intern_35 = 0.9400000013411045, $intern_36 = 0.029999999329447746, $intern_37 = {58:1, 3:1, 7:1, 6:1}, $intern_38 = 10.000000149011612, $intern_39 = 20.000000298023224, $intern_40 = -16731380, $intern_41 = 1.4285714626312256, $intern_42 = 15.000000953674316, $intern_43 = -1118482, $intern_44 = {3:1, 85:1, 10:1}, $intern_45 = {675:1, 3:1}, $intern_46 = {3:1, 7:1, 6:1, 66:1}, $intern_47 = {38:1, 36:1}, $intern_48 = {38:1, 36:1, 49:1, 48:1}, $intern_49 = {47:1, 3:1}, $intern_50 = 0.10000000149011612, $intern_51 = 0.699999988079071, $intern_52 = {3:1, 7:1, 6:1, 80:1}, $intern_53 = 3.4028234663852886E38, $intern_54 = {3:1, 214:1}, $intern_55 = {115:1, 3:1}, $intern_56 = 34962, $intern_57 = 34963, $intern_58 = {3:1, 7:1, 6:1, 20:1}, $intern_59 = {191:1, 48:1}, $intern_60 = -3.4028234663852886E38, $intern_61 = {94:1}, $intern_62 = {13:1, 12:1, 145:1}, $intern_63 = 1.401298464324817E-45, $intern_64 = -5592406, $intern_65 = {91:1, 14:1}, $intern_66 = {3:1, 7:1, 6:1, 75:1}, $intern_67 = {3:1, 7:1, 6:1, 76:1}, $intern_68 = {3:1, 7:1, 6:1, 166:1, 41:1}, $intern_69 = {3:1, 7:1, 6:1, 77:1}, $intern_70 = {3:1, 7:1, 6:1, 56:1};
+var $intern_0 = 2147483647, $intern_1 = {3:1, 5:1}, $intern_2 = {3:1, 29:1, 35:1}, $intern_3 = {212:1, 3:1}, $intern_4 = 65535, $intern_5 = {111:1}, $intern_6 = {28:1}, $intern_7 = {57:1, 3:1, 7:1}, $intern_8 = {64:1, 3:1, 29:1, 35:1}, $intern_9 = {167:1, 112:1, 3:1, 7:1, 6:1}, $intern_10 = {42:1}, $intern_11 = {67:1}, $intern_12 = {3:1, 15:1, 8:1, 10:1}, $intern_13 = {72:1, 16:1, 3:1, 7:1, 6:1}, $intern_14 = {52:1, 16:1, 3:1, 7:1, 6:1}, $intern_15 = {16:1, 53:1, 3:1, 7:1, 6:1}, $intern_16 = {16:1, 54:1, 3:1, 7:1, 6:1}, $intern_17 = {24:1, 3:1, 7:1, 6:1}, $intern_18 = {16:1, 100:1, 3:1, 7:1, 6:1}, $intern_19 = {16:1, 39:1, 3:1, 7:1, 6:1}, $intern_20 = {104:1, 3:1, 15:1, 8:1, 10:1}, $intern_21 = 4194303, $intern_22 = 524288, $intern_23 = {95:1, 68:1, 84:1, 83:1, 96:1, 55:1, 44:1}, $intern_24 = 65536, $intern_25 = 16777216, $intern_26 = 33554432, $intern_27 = 67108864, $intern_28 = {13:1, 12:1}, $intern_29 = {40:1, 3:1, 7:1, 6:1}, $intern_30 = 0.009999999776482582, $intern_31 = 16777215, $intern_32 = {13:1, 19:1, 12:1}, $intern_33 = -16777216, $intern_34 = {14:1}, $intern_35 = 0.9400000013411045, $intern_36 = 0.029999999329447746, $intern_37 = {58:1, 3:1, 7:1, 6:1}, $intern_38 = 20.000000298023224, $intern_39 = 40.00000059604645, $intern_40 = -16731380, $intern_41 = 1.4285714626312256, $intern_42 = 30.000001907348633, $intern_43 = -1118482, $intern_44 = {3:1, 85:1, 10:1}, $intern_45 = {675:1, 3:1}, $intern_46 = {3:1, 7:1, 6:1, 66:1}, $intern_47 = {38:1, 36:1}, $intern_48 = {38:1, 36:1, 49:1, 48:1}, $intern_49 = {47:1, 3:1}, $intern_50 = 0.10000000149011612, $intern_51 = 0.699999988079071, $intern_52 = {3:1, 7:1, 6:1, 80:1}, $intern_53 = 3.4028234663852886E38, $intern_54 = {3:1, 214:1}, $intern_55 = {115:1, 3:1}, $intern_56 = 34962, $intern_57 = 34963, $intern_58 = {3:1, 7:1, 6:1, 20:1}, $intern_59 = {191:1, 48:1}, $intern_60 = -3.4028234663852886E38, $intern_61 = {94:1}, $intern_62 = {13:1, 12:1, 145:1}, $intern_63 = 1.401298464324817E-45, $intern_64 = -5592406, $intern_65 = {91:1, 14:1}, $intern_66 = {3:1, 7:1, 6:1, 75:1}, $intern_67 = {3:1, 7:1, 6:1, 76:1}, $intern_68 = {3:1, 7:1, 6:1, 166:1, 41:1}, $intern_69 = {3:1, 7:1, 6:1, 77:1}, $intern_70 = {3:1, 7:1, 6:1, 56:1};
 var _, initFnList_0, prototypesByTypeId_0 = {}, permutationId = -1;
 function typeMarkerFn(){
 }
@@ -8237,7 +8237,7 @@ function $clinit_Levels(){
   introButtonAndPusher = new Level($read($title(new Level$Builder, 'A door, a button and a rock that looks like a circle?'), '.P.a.WW\nS...A.G\n.....WW'));
   introExpandosForButtons = new Level($read($title(new Level$Builder, 'Why are these things glowing?'), '..a..WW\nS...A.G\n..XX.WW'));
   basicButtons = new Level($read($title(new Level$Builder, 'Why am I asking so many questions?'), 'XX...a.\n.......\n......A\naP.S.W.\n.....P.\n.....WW\n....A.G'));
-  introPushMultiples = new Level($read($title(new Level$Builder, 'I need to grow to be stronger'), '...S...\nPWWW...\nPWXW..X\n.W.WWWW\n...PPP.\n.WW....\n.W....G'));
+  introPushMultiples = new Level($read($title(new Level$Builder, 'I need to grow to be stronger'), '...S...\nPWWW...\nPWXW..X\n.W.WWWW\n...PPP.\n.WW....\n.WW...G'));
   yummy = new Level($read($title(new Level$Builder, 'Yummy!'), 'a.....a\nWW...WW\n......a\n...SWWW\nAWXXXXX\n.WXXXXX\nGWXXXXX'));
   backAndForth = new Level($read($title(new Level$Builder, 'If I ever make a game I will have YOU running around!'), 'S....WWWWXW\n.PP..PPPPP.\nWXW.....W..\n..W....WWXW\n.PPPP..PPP.\nWXWWW...W..\n..W.....WXW\n.PPPPPP..P.\nWGWWWWW....'));
   christmas = new Level($read($title(new Level$Builder, 'Oh come on, is it christmas already!?'), 'S...WGW....\n...WWAWW...\n...Wa.aW...\n..WWWXWWW..\n..Wa.X.aW..\n.WWWWXWWWW.\n.Wa..X..aW.\n.WWWWXWWWW.\nXXXXXXXXXXX'));
@@ -8642,80 +8642,80 @@ function $createTailLayer(this$static){
 
 function $drawButtonImage(this$static){
   var canvas;
-  canvas = $createCanvas(this$static.plat.graphics, 100, 100);
-  $setLineWidth(canvas.ctx, 5);
-  $setFillColor_0($translate_0(($save(canvas.ctx) , canvas), 0, 30.000001192092896), $intern_33);
+  canvas = $createCanvas(this$static.plat.graphics, 200, 200);
+  $setLineWidth(canvas.ctx, 10);
+  $setFillColor_0($translate_0(($save(canvas.ctx) , canvas), 0, 60.00000238418579), $intern_33);
   $setStrokeStyleWeb(canvas.ctx, cssColorString($intern_33));
-  $fillRoundRect(canvas, 5, 30, 90, 40, $intern_38);
-  $strokeRoundRect(canvas, 5, 30, 90, 40, $intern_38);
+  $fillRoundRect(canvas, 10, 60, 180, 80, $intern_38);
+  $strokeRoundRect(canvas, 10, 60, 180, 80, $intern_38);
   $setFillColor_0($translate_0($save_0(($restore(canvas.ctx) , canvas)), 0, $intern_39), -1);
   $setStrokeStyleWeb(canvas.ctx, cssColorString(-5066062));
-  $fillRoundRect(canvas, 5, 30, 90, 40, $intern_38);
-  $strokeRoundRect(canvas, 5, 30, 90, 40, $intern_38);
+  $fillRoundRect(canvas, 10, 60, 180, 80, $intern_38);
+  $strokeRoundRect(canvas, 10, 60, 180, 80, $intern_38);
   return canvas.image;
 }
 
 function $drawDoorImage(this$static){
   var canvas;
-  canvas = $createCanvas(this$static.plat.graphics, 100, 100);
+  canvas = $createCanvas(this$static.plat.graphics, 200, 200);
   $setFillStyleWeb(canvas.ctx, cssColorString(-1));
-  $setLineWidth(canvas.ctx, 5);
+  $setLineWidth(canvas.ctx, 10);
   $setStrokeStyleWeb(canvas.ctx, cssColorString(-5066062));
-  $fillRoundRect(canvas, 5, 10, 90, 100, $intern_39);
-  $strokeRoundRect(canvas, 5, 10, 90, 100, $intern_39);
+  $fillRoundRect(canvas, 10, 20, 180, 200, $intern_39);
+  $strokeRoundRect(canvas, 10, 20, 180, 200, $intern_39);
   return canvas.image;
 }
 
 function $drawExpandoImage(this$static){
   var canvas, g, b;
-  canvas = $createCanvas(this$static.plat.graphics, 100, 100);
+  canvas = $createCanvas(this$static.plat.graphics, 200, 200);
   $setFillStyleWeb(canvas.ctx, cssColorString($intern_40));
-  $fillCircle(canvas, 50, 50, 35);
+  $fillCircle(canvas, 100, 100, 70);
   $setLineWidth(canvas.ctx, $intern_38);
   $setLineCap_0(canvas, ($clinit_Canvas$LineCap() , SQUARE_0));
   $setStrokeColor(canvas, (g = 179 , b = 12 , g = 179 , b = 12 , $intern_33 | min_1(0, 255) << 16 | min_1(round_int(g * $intern_41), 255) << 8 | min_1(round_int(b * $intern_41), 255)));
-  $drawLine_0(canvas, 40, 50, 60, 50);
-  $drawLine_0(canvas, 50, 40, 50, 60);
+  $drawLine_0(canvas, 80, 100, 120, 100);
+  $drawLine_0(canvas, 100, 80, 100, 120);
   return canvas.image;
 }
 
 function $drawGoalImage(this$static){
   var canvas;
-  canvas = $createCanvas(this$static.plat.graphics, 100, 100);
+  canvas = $createCanvas(this$static.plat.graphics, 200, 200);
   $setFillStyleWeb(canvas.ctx, cssColorString($intern_33));
-  $fillRoundRect(canvas, 5, 55, 90, 40, 25);
+  $fillRoundRect(canvas, 10, 110, 180, 80, 50);
   return canvas.image;
 }
 
 function $drawHeadImage(this$static){
   var canvas;
-  canvas = $createCanvas(this$static.plat.graphics, 100, 100);
+  canvas = $createCanvas(this$static.plat.graphics, 200, 200);
   $setFillStyleWeb(canvas.ctx, cssColorString($intern_40));
-  $fillCircle(canvas, 50, 50, 40);
+  $fillCircle(canvas, 100, 100, 80);
   $setFillStyleWeb(canvas.ctx, cssColorString(-1));
-  $fillCircle(canvas, 35, 40, $intern_42);
-  $fillCircle(canvas, 65, 40, $intern_42);
+  $fillCircle(canvas, 70, 80, $intern_42);
+  $fillCircle(canvas, 130, 80, $intern_42);
   $setFillStyleWeb(canvas.ctx, cssColorString($intern_33));
-  $fillCircle(canvas, 35, 40, 5);
-  $fillCircle(canvas, 65, 40, 5);
-  $setStrokeWidth(($setStrokeStyleWeb(canvas.ctx, cssColorString($intern_33)) , canvas), 5);
+  $fillCircle(canvas, 70, 80, 10);
+  $fillCircle(canvas, 130, 80, 10);
+  $setStrokeWidth(($setStrokeStyleWeb(canvas.ctx, cssColorString($intern_33)) , canvas), 10);
   $strokePath(canvas, $bezierTo($moveTo_0(new HtmlPath)));
   return canvas.image;
 }
 
 function $drawPusherImage(this$static){
   var canvas;
-  canvas = $createCanvas(this$static.plat.graphics, 100, 100);
-  $fillRoundRect(($setFillStyleWeb(canvas.ctx, cssColorString(-10526874)) , canvas), 15, 15, 70, 70, 10);
-  $strokeRoundRect($setStrokeWidth(($setStrokeStyleWeb(canvas.ctx, cssColorString(-12434873)) , canvas), 5), 15, 15, 70, 70, 10);
+  canvas = $createCanvas(this$static.plat.graphics, 200, 200);
+  $fillRoundRect(($setFillStyleWeb(canvas.ctx, cssColorString(-10526874)) , canvas), 30, 30, 140, 140, 10);
+  $strokeRoundRect($setStrokeWidth(($setStrokeStyleWeb(canvas.ctx, cssColorString(-12434873)) , canvas), 10), 30, 30, 140, 140, 10);
   return canvas.image;
 }
 
 function $drawTailImage(this$static){
   var canvas;
-  canvas = $createCanvas(this$static.plat.graphics, 100, 100);
+  canvas = $createCanvas(this$static.plat.graphics, 200, 200);
   $setFillStyleWeb(canvas.ctx, cssColorString($intern_40));
-  $fillCircle(canvas, 50, 50, 35);
+  $fillCircle(canvas, 100, 100, 70);
   return canvas.image;
 }
 
@@ -15586,19 +15586,19 @@ defineClass(389, 326, {}, HtmlLogSimple);
 var Lplayn_html_HtmlLogSimple_2_classLit = createForClass('playn.html', 'HtmlLogSimple', 389, Lplayn_html_HtmlLog_2_classLit);
 function $bezierTo(this$static){
   $push_1(this$static.list, 3);
-  $push_1(this$static.list, 35);
-  $push_1(this$static.list, 76);
-  $push_1(this$static.list, 65);
-  $push_1(this$static.list, 76);
-  $push_1(this$static.list, 75);
-  $push_1(this$static.list, 68);
+  $push_1(this$static.list, 70);
+  $push_1(this$static.list, 152);
+  $push_1(this$static.list, 130);
+  $push_1(this$static.list, 152);
+  $push_1(this$static.list, 150);
+  $push_1(this$static.list, 136);
   return this$static;
 }
 
 function $moveTo_0(this$static){
   $push_1(this$static.list, 0);
-  $push_1(this$static.list, 25);
-  $push_1(this$static.list, 68);
+  $push_1(this$static.list, 50);
+  $push_1(this$static.list, 136);
   return this$static;
 }
 
