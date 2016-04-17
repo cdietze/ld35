@@ -177,7 +177,7 @@ public class BoardScreen extends Screen {
                     case PUSHER:
                         return sprites.createPusherLayer();
                     case EXPANDO:
-                        return sprites.createEntityLayer().setTint(0xffff0000);
+                        return sprites.createExpandoLayer();
                     case BUTTON:
                         return sprites.createButtonLayer().setTint(blueDoorTint);
                     case DOOR: {
