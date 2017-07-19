@@ -15,7 +15,7 @@ For sounds: Bfxr
 ## Links
 [Entry to the #35 Ludum Dare compo](http://ludumdare.com/compo/ludum-dare-35/?uid=67399)
 
-[Play it in your browser here](http://cdietze.github.io/quads/)
+[Play it in your browser here](http://cdietze.github.io/ld35/)
 
 ## Build
 
